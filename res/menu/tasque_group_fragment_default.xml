@@ -17,8 +17,8 @@
         android:id="@+id/menu_un_set_default"
         android:icon="@drawable/ic_action_un_pin"
         android:orderInCategory="100"
-        android:showAsAction="collapseActionView"
-        android:title="@string/menu_set_default"/>
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_unset_default"/>
     <item
         android:id="@+id/menu_manage_cateogies"
         android:icon="@drawable/ic_action_which_to_show"

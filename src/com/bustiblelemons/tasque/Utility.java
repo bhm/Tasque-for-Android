@@ -1,5 +1,6 @@
 package com.bustiblelemons.tasque;
 
+import static com.bustiblelemons.tasque.Values.TAG;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -14,6 +15,7 @@ import java.util.Date;
 import android.content.Context;
 import android.os.Environment;
 import android.os.IBinder;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.Animation;
@@ -26,14 +28,17 @@ public class Utility {
 
 	private static Animation slide_in_left;
 	private static Animation slide_out_right;
-//	private static Animation slide_in_up;
-//	private static Animation slide_out_down;
+
+	// private static Animation slide_in_up;
+	// private static Animation slide_out_down;
 
 	public static void loadAnimations(Context context) {
 		slide_in_left = AnimationUtils.loadAnimation(context, R.anim.slide_in_left);
 		slide_out_right = AnimationUtils.loadAnimation(context, R.anim.slide_out_right);
-//		slide_in_up = AnimationUtils.loadAnimation(context, R.anim.slide_in_up);
-//		slide_out_down = AnimationUtils.loadAnimation(context, R.anim.slide_out_down);
+		// slide_in_up = AnimationUtils.loadAnimation(context,
+		// R.anim.slide_in_up);
+		// slide_out_down = AnimationUtils.loadAnimation(context,
+		// R.anim.slide_out_down);
 	}
 
 	public static void hideKeyboard(Context context, IBinder token) {
@@ -204,11 +209,28 @@ public class Utility {
 		File appDatabaseDir = new File(new File(context.getApplicationInfo().dataDir), "databases");
 		File appDatabase = new File(appDatabaseDir, DatabaseAdapter.DATABASE_NAME);
 		File syncedDatabase = new File(path);
-		if (syncedDatabase.length() > 0 && syncedDatabase.lastModified() > appDatabase.lastModified()) {
-			if (!appDatabaseDir.exists()) {
-				appDatabaseDir.mkdir();
+		SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss yyyy/MM/dd");
+		Log.d(TAG,
+				appDatabaseDir.getAbsolutePath() + "\n" + appDatabase.getAbsolutePath() + "\n"
+						+ syncedDatabase.getAbsolutePath());
+		Log.d(TAG, "Synced timestamp: " + format.format(new Date(syncedDatabase.lastModified())));
+		Log.d(TAG, "App Database timestamp: " + format.format(new Date(appDatabase.lastModified())));
+		if (!appDatabaseDir.exists()) {
+			appDatabaseDir.mkdir();
+		}
+		if (!appDatabase.exists()) {
+			Log.d(TAG, "No previous copy.");
+			if (syncedDatabase.exists()) {
+				return Utility.copy(syncedDatabase, appDatabase);
+			} else {
+				Log.d(TAG, "Did not find " + syncedDatabase.getAbsolutePath());
 			}
-			return copy(syncedDatabase, appDatabase);
+		} else {
+			Log.d(TAG, "Found previous copy");
+			if (appDatabase.lastModified() < syncedDatabase.lastModified()) {
+				Log.d(TAG, "Local file is older. Copy");
+				return Utility.copy(syncedDatabase, appDatabase);
+			}
 		}
 		return false;
 	}
@@ -236,10 +258,20 @@ public class Utility {
 			return true;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+			return false;
 		} catch (IOException e) {
 			e.printStackTrace();
+			return false;
 		}
-		return false;
+	}
+
+	public static boolean exportFileExists(Context context) {
+		String externalPath = SettingsUtil.getSyncedDataasePath(context);
+		if ( externalPath.length() > 0) {
+			return new File(externalPath).exists();
+		} else {
+			return false;
+		}
 	}
 
 }

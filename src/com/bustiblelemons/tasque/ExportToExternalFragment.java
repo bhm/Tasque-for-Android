@@ -18,14 +18,19 @@ public class ExportToExternalFragment extends SherlockFragment implements OnClic
 	private TextView no;
 	private TextView yes;
 	private Context context;
-	
+
 	public interface OnExportOptionsChosen {
 		public void onExportOptionsChosen();
 	}
+
+	public interface OnShowExportOptions {
+		public void onShowExportOptions();
+	}
+
 	private OnExportOptionsChosen onExportOptionsChosen;
 	private TextView question;
 	private String exportFile;
-	
+
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
@@ -34,7 +39,7 @@ public class ExportToExternalFragment extends SherlockFragment implements OnClic
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		context  = getActivity().getApplicationContext();
+		context = getActivity().getApplicationContext();
 		view = inflater.inflate(R.layout.fragment_export_to_external, null);
 		yes = (TextView) view.findViewById(R.id.fragment_export_to_dropbox_yes);
 		no = (TextView) view.findViewById(R.id.fragment_export_to_dropbox_no);
@@ -43,7 +48,7 @@ public class ExportToExternalFragment extends SherlockFragment implements OnClic
 		question.setText(String.format(context.getString(R.string.fragment_export_to_dropbox_question), exportFile));
 		yes.setOnClickListener(this);
 		no.setOnClickListener(this);
-		
+
 		return view;
 	}
 

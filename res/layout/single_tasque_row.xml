@@ -39,6 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/single_tasque_title_row"
         android:gravity="right|bottom"
+        android:visibility="gone"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:text="@string/placeholder_date"
         android:textSize="@dimen/font_very_small" />

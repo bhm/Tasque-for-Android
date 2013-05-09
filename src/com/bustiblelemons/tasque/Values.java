@@ -29,8 +29,9 @@ public class Values {
 		public static final class Task {
 			public static final class State {
 				public final static int Active = 0;
-				public final static int Completed = 1;
-				public final static int Discarded = 2;
+				public final static int Incomplete = 1;
+				public final static int Completed = 2;
+				public final static int Discarded = 3;
 				public final static int Deleted = 3;
 			}
 

@@ -148,7 +148,7 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 		listView.setAdapter(adapter);
 	}
 
-	public void addTask() {
+	public void addTask(TextView v) {
 		String taskName = inputField.getText().toString();
 		if (taskName.length() > 0) {
 			Database.insertNewTask(context, String.valueOf(categoryID), taskName);
@@ -156,13 +156,24 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 			this.refreshData();
 		}
 	}
+	
+	public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+		if (event != null) {
+			this.addTask(v);
+			return true;
+		}
+		return false;
+	}
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		menu.clear();
-		if (Tasque.MORE_THAN_ONE_FILES_AVAILABLE) {
-			inflater.inflate(R.menu.tasque_group_change_database_file, menu);
-		}
+		/**
+		 * Needs reworking and loading on the fly. May not be understood by people.
+		 */
+//		if (Tasque.MORE_THAN_ONE_FILES_AVAILABLE) {
+//			inflater.inflate(R.menu.tasque_group_change_database_file, menu);
+//		}
 		if (SettingsUtil.isDefaultCategory(context, categoryID)) {
 			inflater.inflate(R.menu.tasque_group_fragment_default, menu);
 		} else {
@@ -172,14 +183,6 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 			menu.clear();
 			inflater.inflate(R.menu.fragment_tasque_group_delete_tasks, menu);
 		}
-	}
-
-	public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-		if (event != null) {
-			this.addTask();
-			return true;
-		}
-		return false;
 	}
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -197,7 +200,9 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 		abar.setTitle(R.string.fragment_task_group_deleting_title);
 	}
 	
-	private void setActionBarForInput() {
+	public void setActionBarForInput() {
+		abar = getSherlockActivity().getSupportActionBar();
+		inputField = (EditText) abar.getCustomView().findViewById(R.id.actionbar_input);
 		abar.setDisplayShowCustomEnabled(true);
 		abar.setDisplayShowTitleEnabled(false);
 		abar.setTitle(R.string.app_name);
@@ -208,7 +213,7 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_add_new_task:
-			this.addTask();
+			this.addTask(null);
 			this.refreshData();
 			return true;
 		case R.id.menu_manage_cateogies:

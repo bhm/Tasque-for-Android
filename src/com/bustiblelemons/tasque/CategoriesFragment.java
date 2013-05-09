@@ -12,8 +12,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnTouchListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
@@ -25,7 +27,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
-public class CategoriesFragment extends SherlockFragment implements OnItemClickListener {
+public class CategoriesFragment extends SherlockFragment implements OnItemClickListener, OnTouchListener {
 
 	private static boolean DELETING_ENABLED = false;
 	private View view;
@@ -86,6 +88,12 @@ public class CategoriesFragment extends SherlockFragment implements OnItemClickL
 		super.onPause();
 		SettingsUtil.setSelectedCategories(context, adapter.getCheckedIDs());
 	}
+	
+	@Override
+	public void onDetach() {
+		super.onDetach();
+		onRefreshPagerAdapter.onRefreshPagerAdapter();
+	}
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -102,7 +110,6 @@ public class CategoriesFragment extends SherlockFragment implements OnItemClickL
 		switch (item.getItemId()) {
 		case R.id.menu_categories_add:
 			this.addCategory();
-			onRefreshPagerAdapter.onRefreshPagerAdapter();
 			return true;
 		case R.id.menu_ok:
 			getActivity().getSupportFragmentManager().popBackStack();
@@ -170,5 +177,10 @@ public class CategoriesFragment extends SherlockFragment implements OnItemClickL
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		return true;
 	}
 }

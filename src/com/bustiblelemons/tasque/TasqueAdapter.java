@@ -39,9 +39,9 @@ public class TasqueAdapter extends android.widget.BaseAdapter {
 		this.selected_color = context.getResources().getColor(R.color.list_selected_color);
 		this.setChecked();
 	}
-	
+
 	private void setChecked() {
-		while(data.moveToNext()) {
+		while (data.moveToNext()) {
 			int state = data.getInt(data.getColumnIndex(Tasks.STATE));
 			if (state == Task.State.Completed) {
 				checked.put(data.getPosition(), true);
@@ -97,13 +97,12 @@ public class TasqueAdapter extends android.widget.BaseAdapter {
 
 	@Override
 	public long getItemId(int position) {
-		Cursor item = (Cursor) this.getItem(position);		
+		Cursor item = (Cursor) this.getItem(position);
 		return (long) item.getLong(item.getColumnIndex(Tasks.ID));
 	}
-	
 
 	public String getTaskName(int position) {
-		Cursor item  = (Cursor) this.getItem(position);
+		Cursor item = (Cursor) this.getItem(position);
 		return item.getString(item.getColumnIndex(Tasks.NAME));
 	}
 
@@ -115,8 +114,10 @@ public class TasqueAdapter extends android.widget.BaseAdapter {
 		public void setDate(int d) {
 			if (d > 0 && showDate) {
 				String dateString = Utility.getSimpleDate(d, context);
-				this.date.setVisibility(View.VISIBLE);
-				this.date.setText(dateString);
+				if (d < Tasks.INDEFINED_DATE) {
+					this.date.setVisibility(View.VISIBLE);
+					this.date.setText(dateString);
+				}
 			}
 		}
 
@@ -133,6 +134,7 @@ public class TasqueAdapter extends android.widget.BaseAdapter {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		ViewHolder holder;
+//		Log.d(TAG, "getView(" + position + ")");
 		if (convertView == null) {
 			convertView = LayoutInflater.from(context).inflate(R.layout.single_tasque_row, null);
 			holder = new ViewHolder();

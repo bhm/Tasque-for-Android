@@ -1,6 +1,10 @@
 package com.bustiblelemons.tasque;
 
+import static com.bustiblelemons.tasque.Values.TAG;
+
+import java.io.File;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +15,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,17 +27,22 @@ import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bustiblelemons.tasque.ExportToExternalFragment.OnExportOptionsChosen;
+import com.bustiblelemons.tasque.ExportToExternalFragment.OnShowExportOptions;
 import com.bustiblelemons.tasque.ExternalProblemsFragment.OnDatabaseSearchFinished;
+import com.bustiblelemons.tasque.MultipleFilesChooserFragment.OnMultipleFilesDetected;
+import com.bustiblelemons.tasque.MultipleFilesChooserFragment.OnSyncedFileChosen;
 import com.bustiblelemons.tasque.Values.FragmentArguments;
 import com.bustiblelemons.tasque.Values.FragmentArguments.OsInfoFragment;
 import com.bustiblelemons.tasque.Values.FragmentFlags;
 import com.bustiblelemons.tasque.Values.ImporterArguments;
+import com.bustiblelemons.tasque.Values.TasqueArguments;
 
 public class ImporterActivity extends SherlockFragmentActivity implements OnClickListener, OnPageChangeListener,
-		OnCheckedChangeListener, OnDatabaseSearchFinished, OnExportOptionsChosen {
+		OnCheckedChangeListener, OnDatabaseSearchFinished, OnExportOptionsChosen, OnMultipleFilesDetected,
+		OnSyncedFileChosen, OnShowExportOptions {
 
 	private static final String PAGER_ITEM = "pagerItem";
-	
+
 	private ViewPager pager;
 	private SystemPagerAdapter adapter;
 	private TextView rtmButton;
@@ -41,13 +51,17 @@ public class ImporterActivity extends SherlockFragmentActivity implements OnClic
 	private RadioGroup radioPips;
 	private FragmentManager fmanager;
 	private ExternalProblemsFragment externalProblemsFragment;
-	private ExportToExternalFragment exportToDropboxFragment;
+	private ExportToExternalFragment exportToExternal;
+	private MultipleFilesChooserFragment filesChooserFragment;
+	private OnMultipleFilesDetected multipleFilesDetected;
 
 	private int currentPagerItem = 0;
 
 	private boolean startFresh;
 	private boolean useRememberTheMilk;
-	
+	private boolean SHOW_CHOOSER;
+	private boolean PREVIOUS_LOST;
+
 	@Override
 	protected void onCreate(Bundle arg0) {
 		super.onCreate(arg0);
@@ -67,6 +81,7 @@ public class ImporterActivity extends SherlockFragmentActivity implements OnClic
 		rtmButton.setOnClickListener(this);
 		startFreshButton = (TextView) findViewById(R.id.importer_start_fresh_here);
 		startFreshButton.setOnClickListener(this);
+		multipleFilesDetected = this;
 	}
 
 	@Override
@@ -74,7 +89,15 @@ public class ImporterActivity extends SherlockFragmentActivity implements OnClic
 		super.onStart();
 		((RadioButton) radioPips.getChildAt(currentPagerItem)).setChecked(true);
 		if (Utility.isExtenalAvailable()) {
-		
+			Intent startIntent = getIntent();
+			if (startIntent != null) {
+				SHOW_CHOOSER = startIntent.getBooleanExtra(TasqueArguments.SHOW_DATABASE_CHOOSER, false);
+				if (SHOW_CHOOSER) {
+					PREVIOUS_LOST = startIntent.getBooleanExtra(TasqueArguments.LOST_DATABASE, false);
+					multipleFilesDetected.onShowMultipleFilesDetected(Utility.getSyncedDatabasePaths(context),
+							PREVIOUS_LOST);
+				}
+			}
 		} else {
 			this.showExternalProblemsFragment();
 		}
@@ -111,6 +134,23 @@ public class ImporterActivity extends SherlockFragmentActivity implements OnClic
 			transaction.addToBackStack(null);
 			transaction.commit();
 		}
+	}
+
+	@Override
+	public void onShowMultipleFilesDetected(ArrayList<File> files, boolean lostPrevious) {
+		if (filesChooserFragment == null) {
+			filesChooserFragment = new MultipleFilesChooserFragment();
+		}
+		Bundle args = new Bundle();
+		args.putSerializable(FragmentArguments.MultipleFiles.FILES_FOUND, files);
+		args.putBoolean(FragmentArguments.MultipleFiles.LOST_PREVIOUS, lostPrevious);
+		filesChooserFragment.setArguments(args);
+		FragmentTransaction transaction = fmanager.beginTransaction();
+		transaction.add(android.R.id.content, filesChooserFragment, FragmentFlags.MULTIPLEFILES_FRAGMENT);
+		transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right, R.anim.slide_in_left,
+				R.anim.slide_out_right);
+		transaction.addToBackStack(null);
+		transaction.commit();
 	}
 
 	private void populateRadioGroup(RadioGroup radioPips2) {
@@ -173,20 +213,25 @@ public class ImporterActivity extends SherlockFragmentActivity implements OnClic
 			} catch (SQLException e) {
 				e.printStackTrace();
 			} finally {
+				startFresh = true;
 				SettingsUtil.setStartedFresh(context, true);
-				if (exportToDropboxFragment == null) {
-					exportToDropboxFragment = new ExportToExternalFragment();
-				}
-				FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-				transaction.addToBackStack(null);
-				transaction.add(android.R.id.content, exportToDropboxFragment, FragmentFlags.NOTES_FRAGMENT);
-				transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right, R.anim.slide_in_left,
-						R.anim.slide_out_right);
-				transaction.commit();
+				this.showExportOptionsFragment();
 			}
 		default:
 			break;
 		}
+	}
+
+	private void showExportOptionsFragment() {
+		if (exportToExternal == null) {
+			exportToExternal = new ExportToExternalFragment();
+		}
+		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+		transaction.addToBackStack(null);
+		transaction.add(android.R.id.content, exportToExternal, FragmentFlags.NOTES_FRAGMENT);
+		transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right, R.anim.slide_in_left,
+				R.anim.slide_out_right);
+		transaction.commit();
 	}
 
 	@Override
@@ -225,8 +270,28 @@ public class ImporterActivity extends SherlockFragmentActivity implements OnClic
 		Intent importerIntent = new Intent();
 		importerIntent.putExtra(ImporterArguments.START_FRESH, startFresh);
 		importerIntent.putExtra(ImporterArguments.USE_REMEMBER_THE_MILK, useRememberTheMilk);
-		setIntent(importerIntent);
-		setResult(RESULT_OK);
-		this.finish();		
+		setResult(RESULT_OK, importerIntent);
+		this.finish();
+	}
+
+	@Override
+	public void syncedFileChosen(String filePath) {
+		Utility.toggleVisibiity(findViewById(R.id.activity_importer_main), View.GONE);
+		Utility.toggleVisibiity(findViewById(R.id.activity_importer_progress_bar), View.VISIBLE);
+		Log.d(TAG, "synCedFileChosen(" + filePath + ")");
+		SettingsUtil.setSyncedDatabsePath(context, filePath);
+		if (Utility.copyDatabase(context, filePath)) {
+			Intent importerIntent = new Intent();
+			importerIntent.putExtra(ImporterArguments.START_FRESH, startFresh);
+			importerIntent.putExtra(ImporterArguments.USE_REMEMBER_THE_MILK, useRememberTheMilk);
+			importerIntent.putExtra(ImporterArguments.SYNCED_DATABASE_PATH, filePath);
+			setResult(RESULT_OK, importerIntent);
+			this.finish();
+		}
+	}
+
+	@Override
+	public void onShowExportOptions() {
+		this.showExportOptionsFragment();
 	}
 }

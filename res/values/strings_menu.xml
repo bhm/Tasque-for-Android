@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- COMMON -->
     <string name="menu_settings">Settings</string>
     <string name="menu_import_ok">Save</string>
     <string name="menu_ok">Ok</string>
+    <string name="menu_delete_ok">Delete</string>
+    <string name="menu_delete_cancel">Cancel deletng</string>
+    <!-- TASKS -->
     <string name="menu_add_new_task">New Task</string>
     <string name="menu_start_deleting_tasks">Delete Tasks</string>
     <string name="menu_show_completed">Completed Tasks</string>
+    <string name="menu_set_default">Pin as default</string>
+    <string name="menu_unset_default">Unpin as default</string>
+    <string name="menu_change_database_file">Swap database</string>
+    <!-- Categories -->
     <string name="menu_start_deleting_categories">Delete Categories</string>
-    <string name="menu_delete_ok">Delete</string>
-    <string name="menu_delete_cancel">Cancel deletng</string>
-    <string name="menu_set_default">Set as default</string>
     <string name="menu_manage_categories">Manage categories</string>
-    <string name="menu_change_database_file">Swap the database file</string>
     <string name="menu_add">New category</string>
     <string name="menu_add_note">New note</string>
 

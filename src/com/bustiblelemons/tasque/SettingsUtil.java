@@ -24,7 +24,7 @@ public class SettingsUtil {
 	}
 
 	public static void firstRunDone(Context context) {
-		SettingsUtil.getPreferencesFile(context).edit().putBoolean(context.getString(R.string.pref_first_run), true);
+		SettingsUtil.getPreferencesFile(context).edit().putBoolean(context.getString(R.string.pref_first_run), false).commit();
 	}
 
 	public static boolean hideKeyboard(Context context) {
@@ -99,7 +99,7 @@ public class SettingsUtil {
 
 	public static boolean showDate(Context context) {
 		return SettingsUtil.getPreferencesFile(context).getBoolean(
-				context.getString(R.string.pref_date_format_show_hour_key), false);
+				context.getString(R.string.pref_date_show_date_key), false);
 	}
 
 	public static String getDateFromat(Context context) {

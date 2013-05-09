@@ -8,7 +8,8 @@
     <TextView
         android:id="@+id/fragment_multiple_hint"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0px"
+        android:layout_weight="1"
         android:gravity="center"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
@@ -18,7 +19,16 @@
     <ListView
         android:id="@+id/fragment_multiple_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="0px"
+        android:layout_weight="6" >
     </ListView>
+
+    <TextView
+        android:id="@+id/fragment_multiple_start_fresh"
+        style="@style/ButtonTasque"
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1"
+        android:text="@string/fragment_importer_start_fresh_here" />
 
 </LinearLayout>

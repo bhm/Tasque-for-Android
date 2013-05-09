@@ -42,12 +42,11 @@ import com.bustiblelemons.tasque.TasqueGroupFragment.OnSetDefaultCategory;
 import com.bustiblelemons.tasque.TasqueGroupFragment.OnShowNotesFragment;
 import com.bustiblelemons.tasque.Values.FragmentArguments;
 import com.bustiblelemons.tasque.Values.FragmentFlags;
-import com.bustiblelemons.tasque.Values.TasqueArguments;
 
 public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragment, OnPageChangeListener,
-		OnEditorActionListener, OnSetDefaultCategory, OnMultipleFilesDetected, OnShowCategoriesFragment,
-		OnSyncedFileChosen, OnNotesFragmentHidden, OnRefreshCategoriesInPager,
-		OnShowInAllCategoriesChanged, OnShowCompletedTasksFragment, OnTaskMarkedActive, OnRefreshCategory {
+		OnEditorActionListener, OnSetDefaultCategory, OnShowCategoriesFragment, OnSyncedFileChosen,
+		OnNotesFragmentHidden, OnRefreshCategoriesInPager, OnShowInAllCategoriesChanged, OnShowCompletedTasksFragment,
+		OnTaskMarkedActive, OnRefreshCategory, OnMultipleFilesDetected {
 
 	private static final String PAGER_POSITION = "PAGER_POSITION";
 	public static boolean MORE_THAN_ONE_FILES_AVAILABLE = false;
@@ -59,14 +58,11 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 
 	protected static ArrayList<Entry<Integer, String>> categories;
 	private Context context;
-	private OnMultipleFilesDetected multipleFilesDetected;
 	private MyPagerAdapter pagerAdapter;
 	private ViewPager pager;
 	private EditText customInputField;
 	private ActionBar abar;
 	private RelativeLayout customAbarInputView;
-	private boolean SHOW_CHOOSER = false;
-	private boolean PREVIOUS_LOST = false;
 
 	@Override
 	protected void onCreate(Bundle arg0) {
@@ -74,24 +70,18 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 		Log.d(TAG, "Tasque.class onCreate");
 		context = getApplicationContext();
 		fmanager = getSupportFragmentManager();
-		multipleFilesDetected = this;
 		setContentView(R.layout.activity_tasque);
 		pager = (ViewPager) findViewById(R.id.pager);
 		pager.setOnPageChangeListener(this);
 		abar = getSupportActionBar();
-		customAbarInputView = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.actionbar_input, null);
-		customInputField = (EditText) customAbarInputView.findViewById(R.id.actionbar_input);
-		this.setActionBarForInput();
 		categories = Database.getCategories(context);
-		customInputField.setHint(categories.get(pager.getCurrentItem()).getValue());
-		if (SettingsUtil.autoCap(context)) {
-			customInputField.setRawInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-		}
+		this.setActionBarForInput();
 		completedTasksFragment = new CompletedTasksFragment();
 	}
 
 	private void load() {
 		if (SettingsUtil.isFirstRun(context)) {
+			Log.d(TAG, "First Run. Setting categories and preventing further first runs");
 			SettingsUtil.setSelectedCategoriesToAll(context);
 			SettingsUtil.firstRunDone(context);
 		}
@@ -107,22 +97,11 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 		if (SettingsUtil.hideKeyboard(context)) {
 			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		}
-		Intent startIntent = getIntent();
-		if (startIntent != null) {
-			SHOW_CHOOSER = startIntent.getBooleanExtra(TasqueArguments.SHOW_DATABASE_CHOOSER, false);
-			if (SHOW_CHOOSER) {
-				PREVIOUS_LOST = startIntent.getBooleanExtra(TasqueArguments.LOST_DATABASE, false);
-				multipleFilesDetected.onShowMultipleFilesDetected(Utility.getSyncedDatabasePaths(context),
-						PREVIOUS_LOST);
-			} else {
-				this.load();
-				Utility.applyFontSize(customInputField);
-				customInputField.setOnEditorActionListener(this);
-				int defCat = SettingsUtil.getDefaultCategoryId(context);
-				if (defCat > 0) {
-					this.goToDefaultList(defCat);
-				}
-			}
+		this.load();
+		Utility.applyFontSize(customInputField);
+		int defCat = SettingsUtil.getDefaultCategoryId(context);
+		if (defCat > 0) {
+			this.goToDefaultList(defCat);
 		}
 	}
 
@@ -165,24 +144,7 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 		args.putInt(FragmentArguments.ID, taskID);
 		args.putString(FragmentArguments.TASK_NAME, taskName);
 		notesFragment.setArguments(args);
-		transaction.add(android.R.id.content, notesFragment, FragmentFlags.NOTES_FRAGMENT);
-		transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right, R.anim.slide_in_left,
-				R.anim.slide_out_right);
-		transaction.addToBackStack(null);
-		transaction.commit();
-	}
-
-	@Override
-	public void onShowMultipleFilesDetected(ArrayList<File> files, boolean lostPrevious) {
-		if (filesChooserFragment == null) {
-			filesChooserFragment = new MultipleFilesChooserFragment();
-		}
-		Bundle args = new Bundle();
-		args.putSerializable(FragmentArguments.MultipleFiles.FILES_FOUND, files);
-		args.putBoolean(FragmentArguments.MultipleFiles.LOST_PREVIOUS, lostPrevious);
-		filesChooserFragment.setArguments(args);
-		FragmentTransaction transaction = fmanager.beginTransaction();
-		transaction.add(android.R.id.content, filesChooserFragment, FragmentFlags.MULTIPLEFILES_FRAGMENT);
+		transaction.add(R.id.fragment_pocket, notesFragment, FragmentFlags.NOTES_FRAGMENT);
 		transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right, R.anim.slide_in_left,
 				R.anim.slide_out_right);
 		transaction.addToBackStack(null);
@@ -199,7 +161,7 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 			return;
 		}
 		FragmentTransaction transaction = fmanager.beginTransaction();
-		transaction.add(android.R.id.content, categoriesFragment, FragmentFlags.CATEGORIES_FRAGMENT);
+		transaction.add(R.id.fragment_pocket, categoriesFragment, FragmentFlags.CATEGORIES_FRAGMENT);
 		transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right, R.anim.slide_in_left,
 				R.anim.slide_out_right);
 		transaction.addToBackStack(null);
@@ -213,7 +175,7 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 		args.putInt(FragmentArguments.ID, categoryID);
 		completedTasksFragment.setArguments(args);
 		FragmentTransaction transaction = fmanager.beginTransaction();
-		transaction.add(android.R.id.content, completedTasksFragment, FragmentFlags.COMPLETED_TASKS_FRAGMENT);
+		transaction.add(R.id.fragment_pocket, completedTasksFragment, FragmentFlags.COMPLETED_TASKS_FRAGMENT);
 		transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right, R.anim.slide_in_left,
 				R.anim.slide_out_right);
 		transaction.addToBackStack(null);
@@ -253,6 +215,13 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 	}
 
 	private void setActionBarForInput() {
+		customAbarInputView = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.actionbar_input, null);
+		customInputField = (EditText) customAbarInputView.findViewById(R.id.actionbar_input);
+		customInputField.setOnEditorActionListener(this);
+		customInputField.setHint(categories.get(pager.getCurrentItem()).getValue());
+		if (SettingsUtil.autoCap(context)) {
+			customInputField.setRawInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+		}
 		abar.setDisplayShowCustomEnabled(true);
 		abar.setDisplayShowTitleEnabled(false);
 		abar.setTitle(R.string.app_name);
@@ -376,8 +345,26 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 	@Override
 	public boolean onRefreshCategory() {
 		this.setActionBarForInput();
-		Object o = pagerAdapter.instantiateItem(pager, pager.getCurrentItem());
-		((TasqueGroupFragment) o).refreshData();
+		TasqueGroupFragment f = (TasqueGroupFragment) pagerAdapter.instantiateItem(pager, pager.getCurrentItem());
+		f.refreshData();
+		this.setActionBarForInput();
 		return true;
+	}
+
+	@Override
+	public void onShowMultipleFilesDetected(ArrayList<File> files, boolean lostPrevious) {
+		if (filesChooserFragment == null) {
+			filesChooserFragment = new MultipleFilesChooserFragment();
+		}
+		Bundle args = new Bundle();
+		args.putSerializable(FragmentArguments.MultipleFiles.FILES_FOUND, files);
+		args.putBoolean(FragmentArguments.MultipleFiles.LOST_PREVIOUS, lostPrevious);
+		filesChooserFragment.setArguments(args);
+		FragmentTransaction transaction = fmanager.beginTransaction();
+		transaction.add(android.R.id.content, filesChooserFragment, FragmentFlags.MULTIPLEFILES_FRAGMENT);
+		transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right, R.anim.slide_in_left,
+				R.anim.slide_out_right);
+		transaction.addToBackStack(null);
+		transaction.commit();
 	}
 }

@@ -39,6 +39,7 @@ public class SettingsActivity extends PreferenceActivity {
 		bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_auto_cap_characters_key)));
 		bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_hide_keyboard_key)));
 		bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_time_out_key)));
+		bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_date_show_date_key)));
 		bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_date_format_key)));
 		bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_date_format_show_hour_key)));
 		bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_date_format_show_hour_ampm_key)));
@@ -122,6 +123,7 @@ public class SettingsActivity extends PreferenceActivity {
 			bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_auto_cap_characters_key)));
 			bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_hide_keyboard_key)));
 			bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_time_out_key)));
+			bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_date_show_date_key)));
 			bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_date_format_key)));
 			bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_date_format_show_hour_key)));
 			bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_date_format_show_hour_ampm_key)));

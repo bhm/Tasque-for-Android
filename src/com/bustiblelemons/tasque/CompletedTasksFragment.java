@@ -1,9 +1,14 @@
 package com.bustiblelemons.tasque;
 
+import static com.bustiblelemons.tasque.Values.TAG;
+
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -145,6 +150,10 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 		if (DELETING_ENABLED) {
 			this.adapter.markForDeletion(arg2);
+			ArrayList<String> foo = adapter.getIDsToDelete();
+			for (String id : foo) {
+				Log.d(TAG, "Selected: " + id);
+			}
 		} else {
 			this.adapter.toggle(arg2);
 			Database.markActive(context, String.valueOf(adapter.getItemId(arg2)));
