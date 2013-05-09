@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <ProgressBar
+        android:id="@+id/single_tasque_progressbar"
+        style="@style/ProgressBarTasque"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:progress="50"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/single_tasque_title_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <CheckedTextView
+            android:id="@+id/single_tasque_row_checked_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:checkMark="@drawable/tasque_checkbox_light"
+            android:paddingBottom="@dimen/activity_horizontal_margin"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_horizontal_margin"
+            android:text="@string/placeholder"
+            android:textColor="@color/abs__background_holo_dark"
+            android:textSize="@dimen/font_very_small" >
+        </CheckedTextView>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/single_tasque_row_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/single_tasque_title_row"
+        android:gravity="right|bottom"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:text="@string/placeholder_date"
+        android:textSize="@dimen/font_very_small" />
+
+</RelativeLayout>

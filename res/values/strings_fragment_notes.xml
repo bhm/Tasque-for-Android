@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="fragment_notes_note_input_field_hint">Here goes a new note\'s</string>
+    <string name="fragment_notes_task_name_input_field_hint">This is where task\'s name goes</string>
+    <string name="fragment_notes_title">Notes</string>
+
+</resources>

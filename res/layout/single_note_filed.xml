@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <CheckedTextView
+        android:id="@+id/fragment_notes_note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checkMark="@drawable/tasque_checkbox_light"
+        android:paddingBottom="@dimen/activity_horizontal_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_horizontal_margin"
+        android:text="@string/placeholder"
+        android:textColor="@color/abs__background_holo_dark" />
+
+    <EditText
+        android:id="@+id/fragment_notes_input"
+        style="@style/EditTextTasque"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/activity_horizontal_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_horizontal_margin"
+        android:visibility="gone" />
+
+</RelativeLayout>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Generated with http://android-holo-colors.com -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <style name="Tasque" parent="android:Theme.Light">
+
+    <item name="android:editTextStyle">@style/EditTextTasque</item>
+
+    <item name="android:checkboxStyle">@style/CheckBoxTasque</item>
+
+    <item name="android:radioButtonStyle">@style/RadioButtonTasque</item>
+
+    <item name="android:buttonStyle">@style/ButtonTasque</item>
+
+    <item name="android:imageButtonStyle">@style/ImageButtonTasque</item>
+
+    <item name="android:spinnerStyle">@style/SpinnerTasque</item>
+
+    <item name="android:dropDownSpinnerStyle">@style/SpinnerTasque.DropDown</item>
+
+    <item name="android:spinnerDropDownItemStyle">@style/SpinnerDropDownItemTasque</item>
+
+    <item name="android:progressBarStyleHorizontal">@style/ProgressBarTasque</item>
+
+    <item name="android:seekBarStyle">@style/SeekBarTasque</item>
+
+    <item name="android:buttonStyleToggle">@style/ToggleTasque</item>
+
+    <item name="android:listViewStyle">@style/ListViewTasque</item>
+
+    <item name="android:listViewWhiteStyle">@style/ListViewTasque.White</item>
+
+    <item name="android:spinnerItemStyle">@style/SpinnerItemTasque</item>
+
+  </style>
+
+</resources>

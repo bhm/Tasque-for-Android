@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="creation_string_table_categories">CREATE TABLE Categories (ID INTEGER PRIMARY KEY, Name TEXT, ExternalID INTEGER);</string>
+    <string name="creation_string_table_tasks">CREATE TABLE IF NOT EXISTS Tasks (ID INTEGER PRIMARY KEY, Category TEXT, Name TEXT, DueDate INTEGER, CompletionDate INTEGER, Priority INTEGER, State INTEGER, ExternalID INTEGER);</string>
+    <string name="creation_string_table_notes">CREATE TABLE IF NOT EXISTS Notes (ID INTEGER PRIMARY KEY, Task INTEGER KEY, Name TEXT, Text TEXT, ExternalID TEXT);</string>
+    <string name="insert_category_work">INSERT INTO Categories (Name) VALUES (\'Work\')</string>
+    <string name="insert_category_personal">INSERT INTO Categories (Name) VALUES (\'Personal\');</string>
+    <string name="insert_category_family">INSERT INTO Categories (Name) VALUES (\'Family\');</string>
+    <string name="insert_category_project">INSERT INTO Categories (Name) VALUES (\'Project\');</string>
+
+</resources>

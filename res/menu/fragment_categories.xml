@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_delete_categories_start"
+        android:icon="@drawable/ic_action_delete"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_start_deleting_categories"/>
+    <item
+        android:id="@+id/menu_categories_add"
+        android:icon="@drawable/ic_action_add"
+        android:showAsAction="always"
+        android:title="@string/menu_add"/>
+    <item
+        android:id="@+id/menu_ok"
+        android:icon="@drawable/ic_action_ok"
+        android:showAsAction="always"
+        android:title="@string/menu_import_ok"/>
+
+</menu>

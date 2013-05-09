@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_notes_add"
+        android:icon="@drawable/ic_action_add"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:title="@string/menu_add_note"/>
+    <item
+        android:id="@+id/menu_notes_ok"
+        android:icon="@drawable/ic_action_ok"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:title="@android:string/ok"/>
+    <item
+        android:id="@+id/menu_settings"
+        android:icon="@drawable/ic_action_settings"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_settings"/>
+
+</menu>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="fragment_multiple_hint">I found multiple copies of a database. \n<b>Which one to use?</b></string>
+    <string name="fragment_multiple_hint_lost_previous">The file went missing.\n<b>Choose another file or sync the file in place again</b></string>
+
+</resources>

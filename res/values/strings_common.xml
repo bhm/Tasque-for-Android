@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="placeholder">Place Holder Text</string>    
+    <string name="placeholder_date">2/5 - Thu</string>
+    <string name="placeholder_size">10240</string>
+</resources>

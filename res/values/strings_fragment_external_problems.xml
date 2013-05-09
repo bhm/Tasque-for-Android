@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="fragment_external_problems_hint">Make sure the external memory is mounted.
+        \n I don\'t seem to see it. <b>I will keep checking, though.</b>\nIf you are 100% SD or memory is present.
+        \n Contact me by tapping here.</string>
+    <string name="fragment_external_problems_hint_memory_mounted"><b>Memory is Mounted</b>\nNow searching for the database file!</string>
+    
+</resources>

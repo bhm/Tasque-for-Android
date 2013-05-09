@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="@string/pref_about_screen_title" >
+        <PreferenceScreen android:title="@string/pref_about_screen_title" >
+            <Preference
+                android:summary="@string/pref_about_the_app_summary"
+                android:title="@string/app_name" >
+            </Preference>
+            <Preference
+                android:summary="@string/pref_about_license_summary"
+                android:title="@string/pref_about_license_title" >
+            </Preference>
+        </PreferenceScreen>
+    </PreferenceCategory>
+
+</PreferenceScreen>

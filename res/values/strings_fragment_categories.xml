@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="fragment_categories_title">Categories</string>
+    <string name="fragment_categories_input_hint">New category</string>
+    <string name="fragment_categories_list_hint">Only show these in the All category</string>
+    <string name="fragment_categories_insert_failed_hint">Something went wrong</string>
+
+</resources>

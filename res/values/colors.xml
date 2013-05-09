@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <color name="selection_red">#CC0000</color>
+    
+    <color name="list_selected_color">#70C718</color>
+    <color name="selected_color_list">#70C718</color>
+    
+</resources>

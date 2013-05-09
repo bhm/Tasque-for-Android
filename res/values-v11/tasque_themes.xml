@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Generated with http://android-holo-colors.com -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <style name="Tasque" parent="android:Theme.Holo.Light">
+
+    <item name="android:editTextBackground">@drawable/edit_text_holo_light</item>
+
+    <item name="android:listChoiceIndicatorMultiple">@drawable/btn_check_holo_light</item>
+
+    <item name="android:listChoiceIndicatorSingle">@drawable/btn_radio_holo_light</item>
+
+    <item name="android:buttonStyle">@style/ButtonTasque</item>
+
+    <item name="android:imageButtonStyle">@style/ImageButtonTasque</item>
+
+    <item name="android:dropDownSpinnerStyle">@style/SpinnerTasque</item>
+
+    <item name="android:progressBarStyleHorizontal">@style/ProgressBarTasque</item>
+
+    <item name="android:seekBarStyle">@style/SeekBarTasque</item>
+
+    <item name="android:buttonStyleToggle">@style/ToggleTasque</item>
+
+    <item name="android:listChoiceBackgroundIndicator">@drawable/list_selector_holo_light</item>
+
+    <item name="android:activatedBackgroundIndicator">@drawable/activated_background_holo_light</item>
+
+  </style>
+
+</resources>
