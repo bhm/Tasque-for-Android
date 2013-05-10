@@ -50,6 +50,7 @@ public class TasqueAdapter extends android.widget.BaseAdapter {
 	}
 
 	public void toggle(int position) {
+		Log.d(TAG, "Toggle: " + position);
 		checked.put(position, !checked.get(position));
 	}
 
@@ -129,12 +130,15 @@ public class TasqueAdapter extends android.widget.BaseAdapter {
 		public void setTag(String tag) {
 			title.setTag(tag);
 		}
+
+		public void setBackgroundColor(int color) {
+			title.setBackgroundColor(color);
+		}
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		ViewHolder holder;
-//		Log.d(TAG, "getView(" + position + ")");
 		if (convertView == null) {
 			convertView = LayoutInflater.from(context).inflate(R.layout.single_tasque_row, null);
 			holder = new ViewHolder();
@@ -151,9 +155,9 @@ public class TasqueAdapter extends android.widget.BaseAdapter {
 			Utility.applyFontSize(holder.title);
 		}
 		if (forDeletion.get(position)) {
-			convertView.setBackgroundColor(selected_color);
+			holder.setBackgroundColor(selected_color);
 		} else {
-			convertView.setBackgroundColor(deselected_Normal);
+			holder.setBackgroundColor(deselected_Normal);
 		}
 		return convertView;
 	}

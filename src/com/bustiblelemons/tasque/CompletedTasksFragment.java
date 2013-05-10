@@ -1,14 +1,9 @@
 package com.bustiblelemons.tasque;
 
-import static com.bustiblelemons.tasque.Values.TAG;
-
-import java.util.ArrayList;
-
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -36,7 +31,7 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 
 	private View view;
 	private ListView listView;
-	private TasqueCompletedAdapter adapter;
+	private TasqueAdapter adapter;
 	private Context context;
 	private Bundle args;
 	private Cursor data;
@@ -81,7 +76,7 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		view = inflater.inflate(R.layout.fragment_completed_tasks, null);
 		listView = (ListView) view.findViewById(R.id.fragment_completed_tasks_list);
-		adapter = new TasqueCompletedAdapter(context, data);
+		adapter = new TasqueAdapter(context, data);
 		listView.setAdapter(adapter);
 		listView.setOnItemClickListener(this);
 		listView.setOnItemLongClickListener(this);
@@ -113,12 +108,14 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 			refreshCategory.onRefreshCategory();
 		case R.id.menu_completed_delete_start:
 			DELETING_ENABLED = true;
+			listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 			getActivity().supportInvalidateOptionsMenu();
 			return true;
 		case R.id.menu_completed_delete_ok:
 			Database.markDeleted(context, adapter.getIDsToDelete());
 			data = Database.getCompletedTasks(context, String.valueOf(categoryID));
 		case R.id.menu_completed_delete_cancel:
+			listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 			DELETING_ENABLED = false;
 			adapter.resetDeletionSelection();
 			this.refreshData();
@@ -149,11 +146,7 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 		if (DELETING_ENABLED) {
-			this.adapter.markForDeletion(arg2);
-			ArrayList<String> foo = adapter.getIDsToDelete();
-			for (String id : foo) {
-				Log.d(TAG, "Selected: " + id);
-			}
+			this.adapter.markForDeletion(arg2);			
 		} else {
 			this.adapter.toggle(arg2);
 			Database.markActive(context, String.valueOf(adapter.getItemId(arg2)));
@@ -170,13 +163,13 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 
 	public void refreshData() {
 		this.data = Database.getCompletedTasks(context, String.valueOf(this.categoryID));
-		adapter = new TasqueCompletedAdapter(context, data);
+		adapter = new TasqueAdapter(context, data);
 		listView.setAdapter(adapter);
 	}
 
 	public void loadData(Integer categoryID) {
 		data = Database.getCompletedTasks(context, String.valueOf(categoryID));
-		adapter = new TasqueCompletedAdapter(context, data);
+		adapter = new TasqueAdapter(context, data);
 		listView.setAdapter(adapter);
 	}
 
