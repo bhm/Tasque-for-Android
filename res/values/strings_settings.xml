@@ -27,41 +27,41 @@
 
     <string-array name="pref_time_out_values">
         <item>0</item>
+        <item>50</item>
+        <item>100</item>
         <item>250</item>
+        <item>350</item>
+        <item>400</item>
         <item>500</item>
-        <item>750</item>
+        <item>600</item>
+        <item>700</item>
+        <item>800</item>
+        <item>900</item>
         <item>1000</item>
-        <item>1250</item>
+        <item>1200</item>
         <item>1500</item>
         <item>1750</item>
         <item>2000</item>
-        <item>2250</item>
         <item>2500</item>
-        <item>2750</item>
-        <item>3000</item>
-        <item>3250</item>
-        <item>3500</item>
-        <item>3750</item>
-        <item>4000</item>
     </string-array>
     <string-array name="pref_time_out_names">
         <item>Immediately</item>
-        <item>0,25s</item>
-        <item>0,5s</item>
-        <item>0,75s</item>
+        <item>50s</item>
+        <item>100ms</item>
+        <item>250ms</item>
+        <item>350ms</item>
+        <item>400ms</item>
+        <item>500ms</item>
+        <item>600ms</item>
+        <item>700ms</item>
+        <item>800ms</item>
+        <item>900ms</item>
         <item>1s</item>
-        <item>1,25s</item>
-        <item>1,5s</item>
-        <item>1,75s</item>
+        <item>1.2s</item>
+        <item>1.5s</item>
+        <item>1.75s</item>
         <item>2s</item>
-        <item>2,25s</item>
-        <item>2,5s</item>
-        <item>2,75s</item>
-        <item>3s</item>
-        <item>3,25s</item>
-        <item>3,5s</item>
-        <item>3,75s</item>
-        <item>4s</item>
+        <item>2.5s</item>
     </string-array>
 
     <!-- Font sizes -->

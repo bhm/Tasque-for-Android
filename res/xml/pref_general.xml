@@ -12,7 +12,7 @@
             android:title="@string/pref_hide_keyboard_title" />
 
         <ListPreference
-            android:defaultValue="1250"
+            android:defaultValue="1000"
             android:dependency="@string/pref_date_show_date_key"
             android:entries="@array/pref_time_out_names"
             android:entryValues="@array/pref_time_out_values"
