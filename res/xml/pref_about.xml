@@ -11,6 +11,14 @@
                 android:summary="@string/pref_about_license_summary"
                 android:title="@string/pref_about_license_title" >
             </Preference>
+            <Preference
+                android:summary="@string/pref_about_contact_summary"
+                android:title="@string/pref_about_contact_title" >
+                <intent
+                    android:action="android.intent.action.VIEW"
+                    android:data="mailto:bustiblelemon@gmail.com?subject=Email from Tasque" >
+                </intent>
+            </Preference>
         </PreferenceScreen>
     </PreferenceCategory>
 

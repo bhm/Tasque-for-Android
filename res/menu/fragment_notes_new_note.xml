@@ -10,6 +10,6 @@
         android:id="@+id/menu_note_new_ok"
         android:icon="@drawable/ic_action_ok"
         android:showAsAction="always"
-        android:title="@string/menu_ok"/>
+        android:title="@android:string/ok"/>
 
 </menu>

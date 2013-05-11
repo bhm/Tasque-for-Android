@@ -188,7 +188,7 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 		if (event != null) {
 			if (categoriesFragment != null) {
 				if (categoriesFragment.isVisible()) {
-					return categoriesFragment.onKeyCode(event);
+					return categoriesFragment.onEditorAction(v, actionId, event);
 				}
 			}
 			if (completedTasksFragment.isVisible()) {
@@ -230,26 +230,40 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (filesChooserFragment != null) {
-			if (filesChooserFragment.isVisible()) {
-				Intent goHome = new Intent(Intent.ACTION_MAIN);
-				goHome.addCategory(Intent.CATEGORY_HOME);
-				startActivity(goHome);
-				return false;
-			}
-			return false;
-		}
-		if (notesFragment != null) {
-			if (notesFragment.isVisible()) {
-				return notesFragment.onKeyDown(keyCode, event);
+		if (event != null) {
+			if (keyCode == KeyEvent.KEYCODE_BACK) {
+				if (filesChooserFragment != null) {
+					if (filesChooserFragment.isVisible()) {
+						Intent goHome = new Intent(Intent.ACTION_MAIN);
+						goHome.addCategory(Intent.CATEGORY_HOME);
+						startActivity(goHome);
+						return false;
+					}
+					return false;
+				}
+				if (notesFragment != null) {
+					if (notesFragment.isVisible()) {
+						return notesFragment.onKeyDown(keyCode, event) ? true : super.onKeyDown(keyCode, event);
+					}
+				}
+				if (completedTasksFragment.isVisible()) {
+					return completedTasksFragment.onKeyDown(keyCode, event) ? true : super.onKeyDown(keyCode, event);
+				}
+				if (categoriesFragment != null) {
+					if (categoriesFragment.isVisible()) {
+						return categoriesFragment.onKeyCode(keyCode, event) ? true : super.onKeyDown(keyCode, event);
+					}
+				}
+				TasqueGroupFragment f = (TasqueGroupFragment) pagerAdapter.getFragment(pager.getCurrentItem());
+				if (f.isVisible()) {
+					return f.onKeyDown(keyCode, event) ? true : super.onKeyDown(keyCode, event);
+				}
+				return super.onKeyDown(keyCode, event);
 			}
 			return super.onKeyDown(keyCode, event);
+		} else {
+			return super.onKeyDown(keyCode, event);
 		}
-		TasqueGroupFragment f = (TasqueGroupFragment) pagerAdapter.getItem(pager.getCurrentItem());
-		if (f.isVisible()) {
-			return f.onKeyDown(keyCode, event);
-		}
-		return super.onKeyDown(keyCode, event);
 	}
 
 	@Override

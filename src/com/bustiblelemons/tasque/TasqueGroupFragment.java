@@ -187,11 +187,10 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (DELETING_IN_PROGRESS) {
-			DELETING_IN_PROGRESS = false;
-			getActivity().supportInvalidateOptionsMenu();
+			this.disableDeleting();
 			return true;
 		}
-		return true;
+		return false;
 	}
 	
 	private void startDeleting() {
@@ -247,14 +246,18 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 			tasksToDelete = adapter.getIDsToDelete();
 			Database.markDeleted(context, tasksToDelete);
 		case R.id.menu_delete_tasks_cancel:
-			this.refreshData();
-			this.setActionBarForInput();
-			DELETING_IN_PROGRESS = false;
-			getActivity().supportInvalidateOptionsMenu();
+			this.disableDeleting();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	private void disableDeleting() {
+		this.refreshData();
+		this.setActionBarForInput();
+		DELETING_IN_PROGRESS = false;
+		getActivity().supportInvalidateOptionsMenu();		
 	}
 
 	@Override

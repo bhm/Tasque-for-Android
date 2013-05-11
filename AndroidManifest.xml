@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="9"
         android:targetSdkVersion="17" />
     
 
@@ -40,7 +40,7 @@
             android:name="com.bustiblelemons.tasque.Tasque"
             android:label="@string/app_name"
             android:configChanges="orientation"
-            android:theme="@style/Theme.Tasquelight" >
+            android:theme="@style/Theme.Tasque" >
         </activity>
     </application>
 

@@ -1,7 +1,5 @@
 package com.bustiblelemons.tasque;
 
-import static com.bustiblelemons.tasque.Values.TAG;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -9,17 +7,17 @@ import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
@@ -122,11 +120,8 @@ public class CategoriesFragment extends SherlockFragment implements OnItemClickL
 			ArrayList<String> categoriesToDelete = adapter.getCheckedToDelete();
 			Database.deleteCategories(context, categoriesToDelete);
 			onRefreshPagerAdapter.onRefreshPagerAdapter();
-			this.refreshCategories();
 		case R.id.menu_delete_categories_cancel:
-			DELETING_ENABLED = false;
-			getActivity().supportInvalidateOptionsMenu();
-			adapter.resetForDeletion();
+			this.disableDeleting();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -170,17 +165,29 @@ public class CategoriesFragment extends SherlockFragment implements OnItemClickL
 			e.printStackTrace();
 		}
 	}
+	
+	private void disableDeleting() {
+		DELETING_ENABLED = false;
+		getActivity().supportInvalidateOptionsMenu();
+		this.refreshCategories();
+		adapter.resetForDeletion();
+	}
 
-	public boolean onKeyCode(KeyEvent event) {
-		if (event != null) {
-			addCategory();
+	public boolean onKeyCode(int keyCode, KeyEvent event) {
+		if (DELETING_ENABLED) {
+			this.disableDeleting();
 			return true;
-		}
+		}		
 		return false;
 	}
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
+		return true;
+	}
+
+	public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+		this.addCategory();
 		return true;
 	}
 }

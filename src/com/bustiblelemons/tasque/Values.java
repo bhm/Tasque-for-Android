@@ -5,7 +5,6 @@ public class Values {
 	public static final String TAG = "Tasque";
 	public static final int IMPORTER_REQUEST_CODE = 0x0000009;
 
-
 	public static final class TasqueArguments {
 		public static final String SHOW_DATABASE_CHOOSER = "databaseChooser";
 		public static final String LOST_DATABASE = "lostDatabase";
@@ -59,7 +58,14 @@ public class Values {
 		}
 
 		public static final class Tasks extends Table {
-			public static final long INDEFINED_DATE = -62135600400l;
+			// public static final long INDEFINED_DATE = -62135600400l;
+			/**
+			 * @param INDEFINED_DATE
+			 *            date is stored as Int64 in the Tasque desktop. Sqlite3
+			 *            API cuts down bits no matter what
+			 * 
+			 */
+			public static final long INDEFINED_DATE = -2006058256l;
 			public static final String CATEGORY = "Category";
 			public static final String DUE_DATE = "DueDate";
 			public static final String COMPLETION_DATE = "CompletionDate";

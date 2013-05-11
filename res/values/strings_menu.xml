@@ -4,7 +4,6 @@
     <!-- COMMON -->
     <string name="menu_settings">Settings</string>
     <string name="menu_import_ok">Save</string>
-    <string name="menu_ok">Ok</string>
     <string name="menu_delete_ok">Delete</string>
     <string name="menu_delete_cancel">Cancel deletng</string>
     <!-- TASKS -->

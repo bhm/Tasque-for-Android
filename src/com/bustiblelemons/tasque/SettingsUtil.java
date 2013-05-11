@@ -24,7 +24,8 @@ public class SettingsUtil {
 	}
 
 	public static void firstRunDone(Context context) {
-		SettingsUtil.getPreferencesFile(context).edit().putBoolean(context.getString(R.string.pref_first_run), false).commit();
+		SettingsUtil.getPreferencesFile(context).edit().putBoolean(context.getString(R.string.pref_first_run), false)
+				.commit();
 	}
 
 	public static boolean hideKeyboard(Context context) {
@@ -92,14 +93,24 @@ public class SettingsUtil {
 		return Float.valueOf(_r);
 	}
 
+	public static float getCompletionDateFontSize(Context context) {
+		return Float.valueOf(SettingsUtil.getPreferencesFile(context).getString(
+				context.getString(R.string.pref_font_size_completion_date_key), "13"));
+	}
+
+	public static float getDueDateFontSize(Context context) {
+		return Float.valueOf(SettingsUtil.getPreferencesFile(context).getString(
+				context.getString(R.string.pref_font_size_due_date_key), "13"));
+	}
+
 	public static void setSelectedCategoriesToAll(Context context) {
 		ArrayList<String> categories = Database.getAllCategoryIDS(context);
 		SettingsUtil.setSelectedCategories(context, categories);
 	}
 
 	public static boolean showDate(Context context) {
-		return SettingsUtil.getPreferencesFile(context).getBoolean(
-				context.getString(R.string.pref_date_show_date_key), false);
+		return SettingsUtil.getPreferencesFile(context).getBoolean(context.getString(R.string.pref_date_show_date_key),
+				false);
 	}
 
 	public static String getDateFromat(Context context) {
@@ -142,18 +153,37 @@ public class SettingsUtil {
 	}
 
 	public static void setExportOnExit(Context context, boolean exportToExternal) {
-		SettingsUtil.getPreferencesFile(context).edit().putBoolean(context.getString(R.string.pref_export_database_key), exportToExternal).commit();
+		SettingsUtil.getPreferencesFile(context).edit()
+				.putBoolean(context.getString(R.string.pref_export_database_key), exportToExternal).commit();
 	}
-	
+
 	public static boolean getExportOnExit(Context context) {
-		return SettingsUtil.getPreferencesFile(context).getBoolean(context.getString(R.string.pref_export_database_key), true);
+		return SettingsUtil.getPreferencesFile(context).getBoolean(
+				context.getString(R.string.pref_export_database_key), true);
 	}
 
 	public static boolean getStartedFresh(Context context) {
-		return SettingsUtil.getPreferencesFile(context).getBoolean(context.getString(R.string.pref_started_fresh), false);
+		return SettingsUtil.getPreferencesFile(context).getBoolean(context.getString(R.string.pref_started_fresh),
+				false);
 	}
-	
+
 	public static void setStartedFresh(Context context, boolean startedFresh) {
-		SettingsUtil.getPreferencesFile(context).edit().putBoolean(context.getString(R.string.pref_started_fresh), startedFresh).commit();
+		SettingsUtil.getPreferencesFile(context).edit()
+				.putBoolean(context.getString(R.string.pref_started_fresh), startedFresh).commit();
+	}
+
+	public static boolean useColours(Context context) {
+		return SettingsUtil.getPreferencesFile(context).getBoolean(context.getString(R.string.pref_use_color_key),
+				false);
+	}
+
+	public static int getTodayColor(Context context) {
+		return SettingsUtil.getPreferencesFile(context).getInt(context.getString(R.string.pref_color_today_key),
+				context.getResources().getColor(R.color.default_today_color));
+	}
+
+	public static int getOverdueColor(Context context) {
+		return SettingsUtil.getPreferencesFile(context).getInt(context.getString(R.string.pref_color_today_key),
+				context.getResources().getColor(R.color.default_overdue_color));
 	}
 }

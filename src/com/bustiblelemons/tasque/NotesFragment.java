@@ -104,7 +104,6 @@ public class NotesFragment extends SherlockFragment implements OnItemClickListen
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		Log.d(TAG, "Insert Note: " + INSERT_NOTE + "\nEdit Note: " + EDITING_NOTE);
 		menu.clear();
 		if (INSERT_NOTE || EDITING_NOTE) {
 			inflater.inflate(R.menu.fragment_notes_new_note, menu);
@@ -213,7 +212,6 @@ public class NotesFragment extends SherlockFragment implements OnItemClickListen
 			getActivity().supportInvalidateOptionsMenu();
 			return true;
 		}
-		getActivity().getSupportFragmentManager().popBackStack();
 		return false;
 	}
 

@@ -1,9 +1,11 @@
 package com.bustiblelemons.tasque;
 
+import static com.bustiblelemons.tasque.Values.TAG;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -107,6 +109,7 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 			this.addTask();
 			refreshCategory.onRefreshCategory();
 		case R.id.menu_completed_delete_start:
+			abar.setTitle(R.string.fragment_task_group_deleting_title);
 			DELETING_ENABLED = true;
 			listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 			getActivity().supportInvalidateOptionsMenu();
@@ -115,11 +118,7 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 			Database.markDeleted(context, adapter.getIDsToDelete());
 			data = Database.getCompletedTasks(context, String.valueOf(categoryID));
 		case R.id.menu_completed_delete_cancel:
-			listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-			DELETING_ENABLED = false;
-			adapter.resetDeletionSelection();
-			this.refreshData();
-			getActivity().supportInvalidateOptionsMenu();
+			this.disableDeleting();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -139,14 +138,27 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 		return true;
 	}
 
+	private void disableDeleting() {
+		listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		abar.setTitle(context.getString(R.string.fragment_completed_title));
+		DELETING_ENABLED = false;
+		adapter.resetDeletionSelection();
+		this.refreshData();
+		getActivity().supportInvalidateOptionsMenu();
+	}
+
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (DELETING_ENABLED) {
+			this.disableDeleting();
+			return true;
+		}
 		return false;
 	}
 
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 		if (DELETING_ENABLED) {
-			this.adapter.markForDeletion(arg2);			
+			this.adapter.markForDeletion(arg2);
 		} else {
 			this.adapter.toggle(arg2);
 			Database.markActive(context, String.valueOf(adapter.getItemId(arg2)));

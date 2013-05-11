@@ -28,7 +28,8 @@ public class Splash extends SherlockActivity {
 		Utility.loadAnimations(context);
 		if (SettingsUtil.isFirstRun(context)) {
 			Log.d(TAG, "First run");
-			PreferenceManager.setDefaultValues(context, R.xml.pref_general, true);		
+			PreferenceManager.setDefaultValues(context, R.xml.pref_general, true);
+			PreferenceManager.setDefaultValues(context, R.xml.pref_date_time, true);
 			ArrayList<File> externalDatabases = Utility.getSyncedDatabasePaths(context);
 			switch (externalDatabases.size()) {
 			default:
@@ -47,16 +48,34 @@ public class Splash extends SherlockActivity {
 				this.startNormaly();
 				return;
 			}
+			if (Database.exists(context)) {
+				LOST_DATABASE = true;
+			}
 			this.startImporter();
 		} else {
 			if (SettingsUtil.getStartedFresh(context)) {
+				if (SettingsUtil.getExportOnExit(context)) {
+					if (Utility.isExternalNewer(context)) {
+						Utility.copyDatabase(context);
+					} else {
+						Log.d(TAG, "External was older, did not copy");
+					}
+				}
 				this.startNormaly();
+				return;
+			}
+			if (!Utility.getAppDatabaseFile(context).exists()) {
+				SHOW_DATABASE_CHOOSER = true;
+				LOST_DATABASE = true;
+				this.startImporter();
 				return;
 			}
 			if (SettingsUtil.getExportOnExit(context)) {
 				if (Utility.exportFileExists(context)) {
 					try {
-						Utility.copyDatabase(context);
+						if (Utility.isExternalNewer(context)) {
+							Utility.copyDatabase(context);
+						}
 					} finally {
 						Log.d(TAG, "Copied the database, now starting normally");
 						this.startNormaly();

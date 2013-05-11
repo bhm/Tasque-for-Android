@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 import android.content.Context;
@@ -95,14 +96,12 @@ public class Utility {
 		}
 	}
 
-	public static String getSimpleDate(int date, Context context) {
-		String dateFormat = SettingsUtil.getDateFromat(context);
-		return dateFormat.length() > 0 ? ((new SimpleDateFormat(dateFormat)).format(new Date(date * 1000))) : Utility
-				.getSimpleDate(date);
+	public static void applyCompletionDateFontSize(TextView v) {
+		v.setTextSize(TypedValue.COMPLEX_UNIT_SP, SettingsUtil.getCompletionDateFontSize(v.getContext()));
 	}
 
-	public static String getSimpleDate(int date) {
-		return ((new SimpleDateFormat("d/M - E").format(new Date(date * 1000))));
+	public static void applyDueDateFontSize(TextView v) {
+		v.setTextSize(TypedValue.COMPLEX_UNIT_SP, SettingsUtil.getDueDateFontSize(v.getContext()));
 	}
 
 	public static boolean isDatabaseSynced(Context context) {
@@ -183,7 +182,7 @@ public class Utility {
 	 * @return if successfully pushed local database in place of a synced one
 	 */
 	public static boolean pushDatabase(Context context) {
-		File appDatabase = new File(context.getApplicationInfo().dataDir + "/databases", DatabaseAdapter.DATABASE_NAME);
+		File appDatabase = Utility.getAppDatabaseFile(context);
 		String syncedPath = SettingsUtil.getSyncedDataasePath(context);
 		if (syncedPath.length() > 0) {
 			File syncedDatabase = new File(syncedPath);
@@ -196,6 +195,16 @@ public class Utility {
 			}
 		}
 		return false;
+	}
+
+	public static File getAppDatabaseFile(Context context) {
+		return new File(context.getApplicationInfo().dataDir + "/databases", DatabaseAdapter.DATABASE_NAME);
+	}
+
+	public static boolean isExternalNewer(Context context) {
+		File localDB = Utility.getAppDatabaseFile(context);
+		File externalDB = new File(Utility.getSyncedDatabasePath(context));
+		return (localDB.lastModified() < externalDB.lastModified()) ? true : false;
 	}
 
 	/**
@@ -267,11 +276,41 @@ public class Utility {
 
 	public static boolean exportFileExists(Context context) {
 		String externalPath = SettingsUtil.getSyncedDataasePath(context);
-		if ( externalPath.length() > 0) {
+		if (externalPath.length() > 0) {
 			return new File(externalPath).exists();
 		} else {
 			return false;
 		}
+	}
+
+	/**
+	 * DATES
+	 */
+	public static String getSimpleDate(long date, Context context) {
+		String dateFormat = SettingsUtil.getDateFromat(context);
+		return dateFormat.length() > 0 ? ((new SimpleDateFormat(dateFormat)).format(new Date(date * 1000))) : Utility
+				.getSimpleDate(date);
+	}
+
+	public static String getSimpleDate(long date) {
+		return ((new SimpleDateFormat("d/M - E").format(new Date(date * 1000))));
+	}
+
+	public static boolean isToday(long date) {
+		Calendar t = Calendar.getInstance();
+		Calendar d = Calendar.getInstance();
+		t.setTime(new Date());
+		d.setTime(new Date(date * 1000));
+		return (t.get(Calendar.ERA) == d.get(Calendar.ERA) && t.get(Calendar.YEAR) == d.get(Calendar.YEAR) && t
+				.get(Calendar.DAY_OF_YEAR) == d.get(Calendar.DAY_OF_YEAR));
+	}
+
+	public static boolean isOverDue(long date) {
+		Calendar t = Calendar.getInstance();
+		Calendar d = Calendar.getInstance();
+		t.setTime(new Date());
+		d.setTime(new Date(date * 1000));
+		return t.compareTo(d) > 0 ? true : false;
 	}
 
 }

@@ -8,8 +8,8 @@
     <header
         android:fragment="com.bustiblelemons.tasque.SettingsActivity$AboutPreferenceFragment"
         android:title="@string/pref_header_about" />
-<!--     <header -->
-<!--         android:fragment="com.bustiblelemons.tasque.SettingsActivity$DataSyncPreferenceFragment" -->
-<!--         android:title="@string/pref_header_data_sync" /> -->
+    <header
+        android:fragment="com.bustiblelemons.tasque.SettingsActivity$DateTimePreferenceFragment"
+        android:title="@string/pref_header_date_time" />
 
 </preference-headers>

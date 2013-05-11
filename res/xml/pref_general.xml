@@ -10,11 +10,6 @@
             android:key="@string/pref_hide_keyboard_key"
             android:summary="@string/pref_hide_keyboard_summary"
             android:title="@string/pref_hide_keyboard_title" />
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="@string/pref_date_show_date_key"
-            android:summary="@string/pref_date_show_date_summary"
-            android:title="@string/pref_date_show_date_title" />
 
         <ListPreference
             android:defaultValue="1250"
@@ -24,54 +19,39 @@
             android:key="@string/pref_time_out_key"
             android:summary="@string/pref_time_out_summary"
             android:title="@string/pref_time_out_title" />
-        <ListPreference
-            android:defaultValue="dd/MM - E"
-            android:dependency="@string/pref_date_show_date_key"
-            android:entries="@array/pref_date_format_names"
-            android:entryValues="@array/pref_date_format_values"
-            android:key="@string/pref_date_format_key"
-            android:title="@string/pref_date_format_title" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="@string/pref_date_format_show_hour_key"
-            android:summary="@string/pref_date_format_show_hour_summary"
-            android:title="@string/pref_date_format_show_hour_title" />
-        <CheckBoxPreference
-            android:dependency="@string/pref_date_format_show_hour_key"
-            android:key="@string/pref_date_format_show_hour_ampm_key"
-            android:summary="@string/pref_date_format_show_hour_summary"
-            android:title="@string/pref_date_format_show_hour_ampm_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_font_size_category_title" >
         <ListPreference
-            android:defaultValue="13"
+            android:defaultValue="17"
             android:entries="@array/pref_fonts_size_names"
             android:entryValues="@array/pref_font_size_values"
             android:key="@string/pref_font_size_list_key"
             android:summary="@string/pref_font_size_list_summary"
             android:title="@string/pref_font_size_list_title" />
         <ListPreference
-            android:defaultValue="13"
+            android:defaultValue="17"
             android:entries="@array/pref_fonts_size_names"
             android:entryValues="@array/pref_font_size_values"
             android:key="@string/pref_font_size_input_key"
             android:summary="@string/pref_font_size_input_summary"
             android:title="@string/pref_font_size_input_title" />
-    </PreferenceCategory>
-    <PreferenceCategory android:title="@string/pref_color_category_title" >
-        <yuku.ambilwarna.widget.AmbilWarnaPreference
-            android:defaultValue="0xff000000"
-            android:key="@string/pref_color_today_key"
-            android:title="@string/pref_color_today_title" />
-        <yuku.ambilwarna.widget.AmbilWarnaPreference
-            android:defaultValue="0xff000000"
-            android:key="@string/pref_color_overdue_key"
-            android:title="@string/pref_color_overdue_title" />
+        <ListPreference
+            android:defaultValue="13"
+            android:dependency="@string/pref_date_show_date_key"
+            android:entries="@array/pref_fonts_size_names"
+            android:entryValues="@array/pref_font_size_values"
+            android:key="@string/pref_font_size_completion_date_key"
+            android:title="@string/pref_font_size_completion_date_title" />
+        <ListPreference
+            android:defaultValue="13"
+            android:dependency="@string/pref_date_show_date_key"
+            android:entries="@array/pref_fonts_size_names"
+            android:entryValues="@array/pref_font_size_values"
+            android:key="@string/pref_font_size_due_date_key"
+            android:title="@string/pref_font_size_due_date_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_export_category_title" >
         <CheckBoxPreference
-            android:defaultValue="true"
             android:key="@string/pref_export_database_key"
             android:summary="@string/pref_export_database_summary"
             android:title="@string/pref_export_database_title" />

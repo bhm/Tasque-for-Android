@@ -24,9 +24,12 @@ public class TasqueAdapter extends android.widget.BaseAdapter {
 	private SparseBooleanArray checked;
 	private Context context;
 	private boolean showDate;
+	private boolean useColours;
 	private SparseBooleanArray forDeletion;
 	private int selected_color;
 	private int deselected_Normal;
+	private int overdue_color;
+	private int today_color;
 
 	public TasqueAdapter(Context context, Cursor data) {
 		this.data = data;
@@ -35,8 +38,11 @@ public class TasqueAdapter extends android.widget.BaseAdapter {
 		this.checked = new SparseBooleanArray();
 		this.forDeletion = new SparseBooleanArray();
 		this.showDate = SettingsUtil.showDate(context);
+		this.useColours = SettingsUtil.useColours(context);
 		this.deselected_Normal = context.getResources().getColor(R.color.abs__background_holo_light);
 		this.selected_color = context.getResources().getColor(R.color.list_selected_color);
+		this.overdue_color = SettingsUtil.getOverdueColor(context);
+		this.today_color = SettingsUtil.getTodayColor(context);
 		this.setChecked();
 	}
 
@@ -50,7 +56,6 @@ public class TasqueAdapter extends android.widget.BaseAdapter {
 	}
 
 	public void toggle(int position) {
-		Log.d(TAG, "Toggle: " + position);
 		checked.put(position, !checked.get(position));
 	}
 
@@ -108,32 +113,54 @@ public class TasqueAdapter extends android.widget.BaseAdapter {
 	}
 
 	private class ViewHolder {
-		CheckedTextView title;
+		CheckedTextView titleView;
 		ProgressBar bar;
-		TextView date;
+		TextView dateView;
+		public TextView dueDateView;
 
-		public void setDate(int d) {
-			if (d > 0 && showDate) {
-				String dateString = Utility.getSimpleDate(d, context);
-				if (d < Tasks.INDEFINED_DATE) {
-					this.date.setVisibility(View.VISIBLE);
-					this.date.setText(dateString);
+		public void setDate(long date) {
+			Log.d(TAG, "Date: " + date);
+			if (date > Tasks.INDEFINED_DATE) {
+				String dateString = Utility.getSimpleDate(date, context);
+				this.dateView.setVisibility(View.VISIBLE);
+				this.dateView.setText(dateString);
+				Utility.applyCompletionDateFontSize(dateView);
+			}
+		}
+
+		public void setDueDate(long date, long completionDate) {
+			if (date > Tasks.INDEFINED_DATE && completionDate > date) {
+				String dateString = Utility.getSimpleDate(date, context);
+				this.dueDateView.setVisibility(View.VISIBLE);
+				this.dueDateView.setText(dateString);
+				Utility.applyDueDateFontSize(dueDateView);
+				if (useColours) {
+					this.setColors(this.dueDateView, date);
 				}
 			}
 		}
 
 		public void setTitle(String title, boolean checked) {
-			this.title.setText(title);
-			this.title.setChecked(checked);
+			this.titleView.setText(title);
+			this.titleView.setChecked(checked);
+		}
+
+		private void setColors(TextView v, long date) {
+			if (Utility.isToday(date)) {
+				v.setTextColor(today_color);
+			} else if (Utility.isOverDue(date)) {
+				v.setTextColor(overdue_color);
+			}
 		}
 
 		public void setTag(String tag) {
-			title.setTag(tag);
+			titleView.setTag(tag);
 		}
 
 		public void setBackgroundColor(int color) {
-			title.setBackgroundColor(color);
+			titleView.setBackgroundColor(color);
 		}
+
 	}
 
 	@Override
@@ -142,8 +169,9 @@ public class TasqueAdapter extends android.widget.BaseAdapter {
 		if (convertView == null) {
 			convertView = LayoutInflater.from(context).inflate(R.layout.single_tasque_row, null);
 			holder = new ViewHolder();
-			holder.title = (CheckedTextView) convertView.findViewById(R.id.single_tasque_row_checked_title);
-			holder.date = (TextView) convertView.findViewById(R.id.single_tasque_row_date);
+			holder.titleView = (CheckedTextView) convertView.findViewById(R.id.single_tasque_row_checked_title);
+			holder.dateView = (TextView) convertView.findViewById(R.id.single_tasque_row_date);
+			holder.dueDateView = (TextView) convertView.findViewById(R.id.single_tasque_row_due_date);
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
@@ -151,8 +179,12 @@ public class TasqueAdapter extends android.widget.BaseAdapter {
 		if (data.moveToPosition(position)) {
 			holder.setTitle(data.getString(data.getColumnIndex(Tasks.NAME)), checked.get(position));
 			holder.setTag(data.getString(data.getColumnIndex(Tasks.ID)));
-			holder.setDate(data.getInt(data.getColumnIndex(Tasks.COMPLETION_DATE)));
-			Utility.applyFontSize(holder.title);
+			if (showDate) {
+				holder.setDate(data.getLong(data.getColumnIndex(Tasks.COMPLETION_DATE)));
+				holder.setDueDate(data.getLong(data.getColumnIndex(Tasks.DUE_DATE)),
+						data.getInt(data.getColumnIndex(Tasks.COMPLETION_DATE)));
+			}
+			Utility.applyFontSize(holder.titleView);
 		}
 		if (forDeletion.get(position)) {
 			holder.setBackgroundColor(selected_color);

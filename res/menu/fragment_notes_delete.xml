@@ -10,6 +10,6 @@
         android:id="@+id/menu_notes_delete_ok"
         android:icon="@drawable/ic_action_delete"
         android:showAsAction="always"
-        android:title="@string/menu_ok"/>
+        android:title="@string/menu_delete_ok"/>
 
 </menu>

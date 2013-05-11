@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
-    <string name="pref_header_about">About</string>
 
+    <string name="pref_header_general">General</string>
+    <string name="pref_header_date_time">Date&amp;Time</string>
+    <string name="pref_header_about">About</string>
     <string name="pref_currently_prefix">Currently:&#160;</string>
     <string name="pref_enabled">ON</string>
     <string name="pref_disabled">OFF</string>
-    <string name="pref_header_general">General</string>
     <string name="pref_first_run">first_run</string>
     <string name="title_activity_settings">Settings</string>
     <string name="pref_input_category_title">Input settings</string>
@@ -72,6 +72,10 @@
     <string name="pref_font_size_input_key">font_size_list_input_field</string>
     <string name="pref_font_size_input_title">Input font size</string>
     <string name="pref_font_size_input_summary">Each time you enter a text, this big it will be.\n</string>
+    <string name="pref_font_size_due_date_key">due_date_font_size</string>
+    <string name="pref_font_size_due_date_title">Due date</string>
+    <string name="pref_font_size_completion_date_key">completion_date_font_size</string>
+    <string name="pref_font_size_completion_date_title">Completion date</string>
 
     <string-array name="pref_font_size_values">
         <item>9</item>
@@ -124,11 +128,11 @@
         <item>32</item>
     </string-array>
 
-    <!-- Date format -->
-    
+    <!-- Time and Date format -->
+    <string name="pref_time_category_title">Date&amp;Time</string>
     <string name="pref_date_show_date_key">show_date</string>
-	<string name="pref_date_show_date_title">Completion date</string>
-	<string name="pref_date_show_date_summary">Will show the date you marked a task as completed.\n</string>
+    <string name="pref_date_show_date_title">Completion date</string>
+    <string name="pref_date_show_date_summary">Will show the date you marked a task as completed.\n</string>
     <string name="pref_date_format_key">date_format</string>
     <string name="pref_date_format_title">Date format</string>
 
@@ -162,7 +166,7 @@
     <string name="pref_date_format_show_hour_summary">Should I add the hour of completion?\n</string>
     <string name="pref_date_format_show_hour_ampm_key">key_hour_ampm</string>
     <string name="pref_date_format_show_hour_ampm_title">AM/PM Format</string>
-    <string name="pref_date_format_show_hour_ampm_key">Well, you didn\'t choose where you were born. I chose to be condescening.\n</string>
+    <string name="pref_date_format_show_hour_ampm_summary">Well, you didn\'t choose where you were born. I chose to be condescening.\n</string>
 
     <!-- Marking tasks -->
     <string name="pref_show_completed_key">show_completed</string>
@@ -174,6 +178,9 @@
     <string name="pref_hide_keyboard_title">Hide keyboard</string>
     <string name="pref_hide_keyboard_summary">Tap entry field to bring it backup.\n</string>
     <!-- COLORS -->
+    <string name="pref_use_color_key">use_color</string>
+    <string name="pref_use_color_title">Use color</string>
+    <string name="pref_use_color_summary">Overdue and today\'s tasks will be coloured. May take a slight toll at the performance.\n</string>
     <string name="pref_color_category_title">Color Management</string>
     <string name="pref_color_today_key">color_today</string>
     <string name="pref_color_today_title">Today</string>
@@ -191,5 +198,7 @@
     <string name="pref_about_the_app_summary">is the Android counter part to Tasque, a simple task management app (TODO list) for the Linux Desktop.\n</string>
     <string name="pref_about_license_title">License</string>
     <string name="pref_about_license_summary">Tasque, both for Android and Linux/Windows/Mac are licensed under MIT.\nSearch for <b>Tasque for Android</b> on Github page.\n</string>
+    <string name="pref_about_contact_summary">You wouldn\'t attach a bear.\n</string>
+    <string name="pref_about_contact_title">Contact Me!</string>
 
 </resources>
