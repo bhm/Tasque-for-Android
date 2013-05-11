@@ -29,12 +29,12 @@
         <activity
             android:name="com.bustiblelemons.tasque.ImporterActivity"
             android:label="@string/title_activity_importer"
-            android:theme="@style/Theme.Tasquelight" >
+            android:theme="@style/Theme.Tasque" >
         </activity>
         <activity
             android:name="com.bustiblelemons.tasque.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:theme="@style/Theme.Tasquedark" >
+            android:theme="@style/Theme.Tasquesettings" >
         </activity>
         <activity
             android:name="com.bustiblelemons.tasque.Tasque"
