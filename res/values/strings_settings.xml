@@ -166,7 +166,7 @@
     <string name="pref_date_format_show_hour_summary">Should I add the hour of completion?\n</string>
     <string name="pref_date_format_show_hour_ampm_key">key_hour_ampm</string>
     <string name="pref_date_format_show_hour_ampm_title">AM/PM Format</string>
-    <string name="pref_date_format_show_hour_ampm_summary">Well, you didn\'t choose where you were born. I chose to be condescening.\n</string>
+    <string name="pref_date_format_show_hour_ampm_summary">Well, you didn\'t choose where you were born. I\'d chosen to be condescening.\n</string>
 
     <!-- Marking tasks -->
     <string name="pref_show_completed_key">show_completed</string>

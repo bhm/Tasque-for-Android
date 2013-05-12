@@ -21,7 +21,7 @@
         <CheckedTextView
             android:id="@+id/single_tasque_row_checked_title"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:checkMark="@drawable/tasque_checkbox_light"
             android:paddingBottom="@dimen/activity_horizontal_margin"
             android:paddingLeft="@dimen/activity_horizontal_margin"

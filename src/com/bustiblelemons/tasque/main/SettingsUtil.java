@@ -189,4 +189,8 @@ public class SettingsUtil {
 		return SettingsUtil.getPreferencesFile(context).getInt(context.getString(R.string.pref_color_today_key),
 				context.getResources().getColor(R.color.default_overdue_color));
 	}
+
+	public static boolean startedFresh(Context context) {
+		return SettingsUtil.getStartedFresh(context);
+	}
 }

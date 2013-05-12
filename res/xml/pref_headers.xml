@@ -3,13 +3,13 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-        android:fragment="com.bustiblelemons.tasque.SettingsActivity$GeneralPreferenceFragment"
+        android:fragment="com.bustiblelemons.tasque.main.SettingsActivity$GeneralPreferenceFragment"
         android:title="@string/pref_header_general" />
     <header
-        android:fragment="com.bustiblelemons.tasque.SettingsActivity$AboutPreferenceFragment"
+        android:fragment="com.bustiblelemons.tasque.main.SettingsActivity$AboutPreferenceFragment"
         android:title="@string/pref_header_about" />
     <header
-        android:fragment="com.bustiblelemons.tasque.SettingsActivity$DateTimePreferenceFragment"
+        android:fragment="com.bustiblelemons.tasque.main.SettingsActivity$DateTimePreferenceFragment"
         android:title="@string/pref_header_date_time" />
 
 </preference-headers>

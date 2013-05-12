@@ -13,7 +13,6 @@
 
         <ListPreference
             android:defaultValue="1000"
-            android:dependency="@string/pref_date_show_date_key"
             android:entries="@array/pref_time_out_names"
             android:entryValues="@array/pref_time_out_values"
             android:key="@string/pref_time_out_key"
@@ -37,14 +36,12 @@
             android:title="@string/pref_font_size_input_title" />
         <ListPreference
             android:defaultValue="13"
-            android:dependency="@string/pref_date_show_date_key"
             android:entries="@array/pref_fonts_size_names"
             android:entryValues="@array/pref_font_size_values"
             android:key="@string/pref_font_size_completion_date_key"
             android:title="@string/pref_font_size_completion_date_title" />
         <ListPreference
             android:defaultValue="13"
-            android:dependency="@string/pref_date_show_date_key"
             android:entries="@array/pref_fonts_size_names"
             android:entryValues="@array/pref_font_size_values"
             android:key="@string/pref_font_size_due_date_key"

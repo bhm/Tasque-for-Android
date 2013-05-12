@@ -24,13 +24,18 @@ public class SettingsActivity extends PreferenceActivity {
 	private static Context context;
 	private static String regex;
 	private static String currentlyPrefix;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		context = getApplicationContext();
+		currentlyPrefix = context.getString(R.string.pref_currently_prefix);
+		regex = currentlyPrefix + ".*";
+	}
 
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {
 		super.onPostCreate(savedInstanceState);
-		context = getApplicationContext();
-		currentlyPrefix = context.getString(R.string.pref_currently_prefix);
-		regex = currentlyPrefix + ".*";
 		setupSimplePreferencesScreen();
 	}
 
@@ -146,6 +151,7 @@ public class SettingsActivity extends PreferenceActivity {
 	public static class DateTimePreferenceFragment extends PreferenceFragment {
 		@Override
 		public void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
 			addPreferencesFromResource(R.xml.pref_date_time);
 			context = getActivity().getApplicationContext();
 			bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_date_show_date_key)));
@@ -161,6 +167,7 @@ public class SettingsActivity extends PreferenceActivity {
 	public static class AboutPreferenceFragment extends PreferenceFragment {
 		@Override
 		public void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
 			addPreferencesFromResource(R.xml.pref_about);
 		}
 	}
