@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="@string/pref_about_screen_title" >
+        <Preference
+            android:summary="@string/pref_about_the_app_summary"
+            android:title="@string/app_name" >
+        </Preference>
+        <Preference
+            android:summary="@string/pref_about_license_summary"
+            android:title="@string/pref_about_license_title" >
+        </Preference>
+        <Preference
+            android:summary="@string/pref_about_contact_summary"
+            android:title="@string/pref_about_contact_title" >
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="mailto:bustiblelemon@gmail.com?subject=Email from Tasque" >
+            </intent>
+        </Preference>
+    </PreferenceCategory>
+
+</PreferenceScreen>

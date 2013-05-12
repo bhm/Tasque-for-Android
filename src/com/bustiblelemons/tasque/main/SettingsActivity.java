@@ -17,6 +17,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 
 public class SettingsActivity extends PreferenceActivity {
 	private static final boolean ALWAYS_SIMPLE_PREFS = false;
@@ -152,7 +153,7 @@ public class SettingsActivity extends PreferenceActivity {
 		@Override
 		public void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
-			addPreferencesFromResource(R.xml.pref_date_time);
+			addPreferencesFromResource(R.xml.pref_date_time_fragment);
 			context = getActivity().getApplicationContext();
 			bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_date_show_date_key)));
 			bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_date_format_key)));
@@ -168,7 +169,7 @@ public class SettingsActivity extends PreferenceActivity {
 		@Override
 		public void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
-			addPreferencesFromResource(R.xml.pref_about);
+			addPreferencesFromResource(R.xml.pref_about_fragment);
 		}
 	}
 }

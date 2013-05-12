@@ -36,9 +36,9 @@
     </style>
 
     <style name="ActionBar.Solid.Tasque" parent="@style/Widget.Sherlock.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">@drawable/ab_background_textured_tasque</item>
+        <item name="android:background">@drawable/ab_solid_tasque</item>
         <item name="android:backgroundStacked">@drawable/ab_stacked_solid_tasque</item>
-        <item name="android:backgroundSplit">@drawable/ab_background_textured_tasque</item>
+        <item name="android:backgroundSplit">@drawable/ab_bottom_solid_tasque</item>
         <item name="android:progressBarStyle">@style/ProgressBar.Tasque</item>
     </style>
 

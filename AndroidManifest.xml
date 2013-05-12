@@ -34,12 +34,12 @@
         <activity
             android:name=".splash.ImporterActivity"
             android:label="@string/app_name"
-            android:theme="@style/Tasque" >
+            android:theme="@style/Theme.Tasque" >
         </activity>
         <activity
             android:name=".main.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:theme="@style/Tasque" >
+            android:theme="@style/Theme.Tasquesettings" >
         </activity>
     </application>
 

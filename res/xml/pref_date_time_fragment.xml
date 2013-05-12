@@ -1,0 +1,52 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/pref_time_category_title" >
+
+    <PreferenceCategory android:title="@string/pref_time_category_title" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/pref_date_show_date_key"
+            android:summary="@string/pref_date_show_date_summary"
+            android:title="@string/pref_date_show_date_title" />
+
+        <ListPreference
+            android:defaultValue="dd/MM - E"
+            android:dependency="@string/pref_date_show_date_key"
+            android:entries="@array/pref_date_format_names"
+            android:entryValues="@array/pref_date_format_values"
+            android:key="@string/pref_date_format_key"
+            android:title="@string/pref_date_format_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="@string/pref_date_show_date_key"
+            android:key="@string/pref_date_format_show_hour_key"
+            android:summary="@string/pref_date_format_show_hour_summary"
+            android:title="@string/pref_date_format_show_hour_title" />
+        <CheckBoxPreference
+            android:dependency="@string/pref_date_format_show_hour_key"
+            android:key="@string/pref_date_format_show_hour_ampm_key"
+            android:summary="@string/pref_date_format_show_hour_ampm_summary"
+            android:title="@string/pref_date_format_show_hour_ampm_title" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="@string/pref_date_show_date_key"
+            android:key="@string/pref_use_color_key"
+            android:summary="@string/pref_use_color_summary"
+            android:title="@string/pref_use_color_title" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:dependency="@string/pref_date_show_date_key"
+        android:title="@string/pref_color_category_title" >
+        <yuku.ambilwarna.widget.AmbilWarnaPreference
+            android:defaultValue="@integer/yuku_default_today_color"
+            android:dependency="@string/pref_use_color_key"
+            android:key="@string/pref_color_today_key"
+            android:title="@string/pref_color_today_title" />
+        <yuku.ambilwarna.widget.AmbilWarnaPreference
+            android:defaultValue="@integer/yuku_default_overdue_color"
+            android:dependency="@string/pref_use_color_key"
+            android:key="@string/pref_color_overdue_key"
+            android:title="@string/pref_color_overdue_title" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
