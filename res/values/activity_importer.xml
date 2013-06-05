@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="activity_chooser_hint"><b>Which database to use?</b></string>
+    <string name="activity_chooser_hint_lost_previous">The file went missing.\n<b>Choose another file or sync the file in place again</b></string>
+    <string name="activity_chooser_connection_un_available"><b>Connect to a network</b></string>
+    <string name="activity_chooser_remember_the_milk">Login to Remember The Milk</string>
+
+</resources>

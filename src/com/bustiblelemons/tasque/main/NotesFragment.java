@@ -1,14 +1,12 @@
 package com.bustiblelemons.tasque.main;
 
-import static com.bustiblelemons.tasque.utilities.Values.TAG;
-
 import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
+import android.text.InputType;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,23 +23,27 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.bustiblelemons.tasque.R;
-import com.bustiblelemons.tasque.utilities.Database;
+import com.bustiblelemons.tasque.database.Database;
+import com.bustiblelemons.tasque.frontend.Note;
+import com.bustiblelemons.tasque.frontend.Task;
+import com.bustiblelemons.tasque.main.TasqueGroupFragment.OnSetActionBarForInput;
 import com.bustiblelemons.tasque.utilities.Utility;
 import com.bustiblelemons.tasque.utilities.Values.FragmentArguments;
-import com.bustiblelemons.tasque.utilities.Values.Database.Notes;
 
 public class NotesFragment extends SherlockFragment implements OnItemClickListener, OnItemLongClickListener {
 
-	private static boolean INSERT_NOTE = false;
-	private static boolean EDITING_NOTE = false;
-	private static boolean DELETING_ENABLED;
+	public static final String FRAGMENT_TAG = "notes";
+	private boolean INSERT_NOTE = false;
+	private boolean EDITING_NOTE = false;
+	private boolean DELETING_ENABLED = false;
 	private View view;
 	private Bundle args;
-	private int taskID;
+	private String taskId;
+	private String listId;
 	private Context context;
 	private NotesAdapter adapter;
 	private ListView listView;
-	private Cursor notes;
+	private Cursor data;
 	private EditText noteInputField;
 	private ActionBar abar;
 	private EditText taskNameInputField;
@@ -50,28 +52,20 @@ public class NotesFragment extends SherlockFragment implements OnItemClickListen
 		public void onNotesFragmentHidden(boolean taskNameChanged);
 	}
 
+	private OnSetActionBarForInput setActionBarForInput;
 	private OnNotesFragmentHidden notesFragmentHidden;
 	private String taskName;
-	private String oldNote;
 
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		if (activity instanceof OnNotesFragmentHidden) {
-			notesFragmentHidden = (OnNotesFragmentHidden) activity;
-		} else {
-			throw new ClassCastException(activity.getClass().getSimpleName() + " should implement "
-					+ OnNotesFragmentHidden.class.getSimpleName());
-		}
+		notesFragmentHidden = (OnNotesFragmentHidden) activity;
+		setActionBarForInput = (OnSetActionBarForInput) activity;
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		context = getActivity().getApplicationContext();
-		abar = getSherlockActivity().getSupportActionBar();
-		abar.setDisplayShowCustomEnabled(false);
-		abar.setDisplayShowTitleEnabled(true);
-		abar.setTitle(R.string.fragment_notes_title);
 		view = inflater.inflate(R.layout.fragment_notes, null);
 		taskNameInputField = (EditText) view.findViewById(R.id.fragment_notes_task_name_input_field);
 		Utility.applyFontSize(taskNameInputField);
@@ -80,16 +74,32 @@ public class NotesFragment extends SherlockFragment implements OnItemClickListen
 		args = getArguments();
 		taskName = args.getString(FragmentArguments.TASK_NAME);
 		taskNameInputField.setText(taskName);
-		taskID = args.getInt(FragmentArguments.ID);
+		listId = args.getString(FragmentArguments.LIST_ID);
+		taskId = args.getString(FragmentArguments.ID);
 		listView = (ListView) view.findViewById(R.id.fragment_notes_list);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		listView.setOnItemClickListener(this);
 		listView.setOnItemLongClickListener(this);
-		notes = Database.getNotes(context, String.valueOf(String.valueOf(taskID)));
-		adapter = new NotesAdapter(context, notes);
+		data = Database.getNotes(context, taskId);
+		adapter = new NotesAdapter(context, data);
 		listView.setAdapter(adapter);
 		setHasOptionsMenu(true);
+		if (SettingsUtil.autoCap(context)) {
+			taskNameInputField.setRawInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+			noteInputField.setRawInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+		}
+		Utility.applyFontSize(noteInputField);
+		Utility.applyFontSize(taskNameInputField);
 		return view;
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		abar = getSherlockActivity().getSupportActionBar();
+		abar.setDisplayShowCustomEnabled(false);
+		abar.setDisplayShowTitleEnabled(true);
+		abar.setTitle(R.string.fragment_notes_title);
 	}
 
 	@Override
@@ -99,10 +109,16 @@ public class NotesFragment extends SherlockFragment implements OnItemClickListen
 		boolean taskNameChanged = false;
 		if (!taskName.equals(currentTaskName)) {
 			taskName = currentTaskName;
-			Database.updateTask(context, String.valueOf(taskID), taskName);
+			Task.rename(context, listId, taskId, taskName);
 			taskNameChanged = true;
 		}
 		notesFragmentHidden.onNotesFragmentHidden(taskNameChanged);
+	}
+
+	@Override
+	public void onDetach() {
+		super.onDetach();
+		setActionBarForInput.setActionBarForInput();
 	}
 
 	@Override
@@ -127,32 +143,27 @@ public class NotesFragment extends SherlockFragment implements OnItemClickListen
 			DELETING_ENABLED = false;
 			INSERT_NOTE = true;
 			getActivity().supportInvalidateOptionsMenu();
+			noteInputField.requestFocus();
 			return true;
 		case R.id.menu_note_new_ok:
-			String body = noteInputField.getText().toString();
-			Log.d(TAG, "Note\nID: " + String.valueOf(taskID) + "\nBody: " + body);
-			if (EDITING_NOTE) {
-				Database.updateTaskNote(context, String.valueOf(taskID), oldNote, body);
-			} else if (INSERT_NOTE) {
-				Database.insertNote(context, String.valueOf(taskID), body);
-			}
+			this.addNote();
 			this.refreshData();
 		case R.id.menu_note_new_cancel:
 			adapter.resetSelections();
 			adapter.notifyDataSetChanged();
+			Utility.hideKeyboard(noteInputField);
 			Utility.toggleVisibiity(noteInputField, View.GONE);
 			Utility.toggleVisibiity(listView, View.VISIBLE);
 			noteInputField.clearFocus();
 			taskNameInputField.clearFocus();
-			Utility.hideKeyboard(noteInputField);
 			INSERT_NOTE = false;
 			EDITING_NOTE = false;
 			DELETING_ENABLED = false;
 			getActivity().supportInvalidateOptionsMenu();
 			return true;
 		case R.id.menu_notes_delete_ok:
-			ArrayList<String> forDeletion = ((NotesAdapter) listView.getAdapter()).getSelected();
-			Database.deleteNotes(context, String.valueOf(taskID), forDeletion);
+			ArrayList<String> forDeletion = adapter.getSelected();
+			Note.delete(context, taskId, forDeletion);
 			this.refreshData();
 		case R.id.menu_notes_delete_cancel:
 			INSERT_NOTE = false;
@@ -167,6 +178,17 @@ public class NotesFragment extends SherlockFragment implements OnItemClickListen
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	private void addNote() {
+		String body = noteInputField.getText().toString();
+		if (EDITING_NOTE) {
+			String noteId = noteInputField.getTag(R.id.notes_fragment_note_id).toString();
+			String oldBody = noteInputField.getTag(R.id.notes_fragment_note_old_body).toString();
+			Note.update(context, noteId, listId, taskId, oldBody, body);
+		} else {
+			Note.add(context, listId, taskId, body);
 		}
 	}
 
@@ -185,11 +207,13 @@ public class NotesFragment extends SherlockFragment implements OnItemClickListen
 
 	@Override
 	public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-		Cursor data = (Cursor) arg0.getAdapter().getItem(arg2);
 		Utility.toggleVisibiity(noteInputField, View.VISIBLE);
 		Utility.toggleVisibiity(listView, View.GONE);
-		oldNote = data.getString(data.getColumnIndex(Notes.TEXT));
-		noteInputField.setText(oldNote);
+		String noteBody = adapter.getNoteBody(arg2);
+		noteInputField.setText(noteBody);
+		String noteId = adapter.getNoteId(arg2);
+		noteInputField.setTag(R.id.notes_fragment_note_id, noteId);
+		noteInputField.setTag(R.id.notes_fragment_note_old_body, noteBody);
 		EDITING_NOTE = true;
 		INSERT_NOTE = false;
 		getActivity().supportInvalidateOptionsMenu();
@@ -198,7 +222,7 @@ public class NotesFragment extends SherlockFragment implements OnItemClickListen
 
 	/**
 	 * 
-	 * @return true to propagate further, false to stop it.
+	 * @return false to propagate further, true to stop it here.
 	 */
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (EDITING_NOTE || INSERT_NOTE) {
@@ -218,9 +242,9 @@ public class NotesFragment extends SherlockFragment implements OnItemClickListen
 		return false;
 	}
 
-	private void refreshData() {
-		notes = Database.getNotes(context, String.valueOf(taskID));
-		adapter = new NotesAdapter(context, notes);
+	public void refreshData() {
+		data = Database.getNotes(context, taskId);
+		adapter = new NotesAdapter(context, data);
 		listView.setAdapter(adapter);
 		adapter.notifyDataSetChanged();
 	}

@@ -1,20 +1,24 @@
-package com.bustiblelemons.tasque.main;
+package com.bustiblelemons.tasque.splash;
 
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bustiblelemons.tasque.R;
+import com.bustiblelemons.tasque.main.SettingsUtil;
 
-public class ExportToExternalFragment extends SherlockFragment implements OnClickListener {
+public class ExportToExternalFragment extends SherlockFragment implements OnClickListener, OnTouchListener {
 
+	public static final String FRAGMENT_TAG = "export";
 	View view;
 	private TextView no;
 	private TextView yes;
@@ -68,5 +72,10 @@ public class ExportToExternalFragment extends SherlockFragment implements OnClic
 		default:
 			break;
 		}
+	}
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		return true;
 	}
 }

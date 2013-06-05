@@ -31,4 +31,12 @@
         android:layout_weight="1"
         android:text="@string/fragment_importer_start_fresh_here" />
 
+    <TextView
+        android:id="@+id/fragment_multiple_use_rtm"
+        style="@style/ButtonTasque"
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1"
+        android:text="@string/fragment_importer_use_remember_the_milk" />
+
 </LinearLayout>

@@ -6,15 +6,17 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnTouchListener;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bustiblelemons.tasque.R;
 import com.bustiblelemons.tasque.utilities.Utility;
 
-public class ExternalProblemsFragment extends SherlockFragment {
+public class ExternalProblemsFragment extends SherlockFragment implements OnTouchListener {
 
 	private View view;
 	private TextView hint;
@@ -98,6 +100,11 @@ public class ExternalProblemsFragment extends SherlockFragment {
 			}
 		});
 		checker.start();
+	}
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		return true;
 	}
 
 }

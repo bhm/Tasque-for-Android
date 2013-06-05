@@ -8,14 +8,13 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.bustiblelemons.tasque.R;
+import com.bustiblelemons.tasque.database.Database;
 import com.bustiblelemons.tasque.main.SettingsUtil;
 import com.bustiblelemons.tasque.main.Tasque;
-import com.bustiblelemons.tasque.utilities.Database;
 import com.bustiblelemons.tasque.utilities.Utility;
 import com.bustiblelemons.tasque.utilities.Values;
 import com.bustiblelemons.tasque.utilities.Values.TasqueArguments;
@@ -32,10 +31,12 @@ public class Splash extends SherlockActivity {
 		setContentView(R.layout.activity_splash);
 		context = getApplicationContext();
 		Utility.loadAnimations(context);
+		if (SettingsUtil.getUseRTMBackend(context)) {
+			this.startNormaly();
+			return;
+		}
 		if (SettingsUtil.isFirstRun(context)) {
 			Log.d(TAG, "First run");
-			PreferenceManager.setDefaultValues(context, R.xml.pref_general, true);
-			PreferenceManager.setDefaultValues(context, R.xml.pref_date_time, true);
 			ArrayList<File> externalDatabases = Utility.getSyncedDatabasePaths(context);
 			switch (externalDatabases.size()) {
 			default:
@@ -99,6 +100,7 @@ public class Splash extends SherlockActivity {
 
 	private void startImporter() {
 		Intent importer = new Intent(this, ImporterActivity.class);
+		importer.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		importer.putExtra(TasqueArguments.LOST_DATABASE, LOST_DATABASE);
 		importer.putExtra(TasqueArguments.SHOW_DATABASE_CHOOSER, SHOW_DATABASE_CHOOSER);
 		startActivityForResult(importer, Values.IMPORTER_REQUEST_CODE);
@@ -106,6 +108,7 @@ public class Splash extends SherlockActivity {
 
 	private void startNormaly() {
 		Intent tasque = new Intent(this, Tasque.class);
+		tasque.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		startActivity(tasque);
 		this.finish();
 	}

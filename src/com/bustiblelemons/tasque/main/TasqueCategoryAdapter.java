@@ -33,6 +33,10 @@ public class TasqueCategoryAdapter extends BaseAdapter {
 		this.selected = SettingsUtil.getSelectedCategories(context);
 		this.selected_color = context.getResources().getColor(R.color.selected_color_list);
 		this.deselected_color = context.getResources().getColor(R.color.abs__background_holo_light);
+		this.selectedForAll();
+	}
+
+	private void selectedForAll() {
 		while (data.moveToNext()) {
 			String id = data.getString(data.getColumnIndex(Categories.ID));
 			if (selected.contains(id)) {
@@ -51,11 +55,11 @@ public class TasqueCategoryAdapter extends BaseAdapter {
 		}
 		return r;
 	}
-	
+
 	public void markForDeletion(int position) {
 		forDelete.put(position, !forDelete.get(position));
 	}
-	
+
 	public void resetForDeletion() {
 		this.forDelete = new SparseBooleanArray();
 	}
@@ -82,6 +86,14 @@ public class TasqueCategoryAdapter extends BaseAdapter {
 			}
 		}
 		return r;
+	}
+
+	public String getName(int position) {
+		return data.moveToPosition(position) ? data.getString(data.getColumnIndex(Categories.NAME)) : "";
+	}
+
+	public String getItemStringId(int position) {
+		return data.moveToPosition(position) ? data.getString(data.getColumnIndex(Categories.ID)) : "";
 	}
 
 	@Override

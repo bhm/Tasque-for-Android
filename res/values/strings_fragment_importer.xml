@@ -4,11 +4,11 @@
     <string name="title_activity_importer">Import database</string>
     <string name="fragment_importer_title">Import database</string>
     <string name="fragment_importer_hint">Sync files below to your device via Dropbox/Ubuntu One/Box/etc</string>
-    <string name="fragment_importer_hint_linux"><b>Linux</b>\n: ~/.config/tasque\n\n$ ln -s ~/.config/tasque /path/to/dropbox/folder</string>
-    <string name="fragment_importer_hint_mac"><b>Mac:</b>\n \n\n ln -s </string>
-    <string name="fragment_importer_hint_windows"><b>Windows</b></string>
+    <string name="fragment_importer_hint_linux"><b>Linux</b>\n ~/.config/tasque\n\n$ ln -s ~/.config/tasque /path/to/dropbox/folder</string>
+    <string name="fragment_importer_hint_mac"><b>Mac</b>\nLook in the ~/Library folder for a sqlitebackend.db file.</string>
+    <string name="fragment_importer_hint_windows" formatted="false"><b>WindowsXP</b> %USERPROFILE%\\Application Data\\Tasque\n <b>Vista/7/8/etc</b> %USERPROFILE%\\AppData\\Roaming\\Tasque</string>
     <string name="fragment_importer_hint_done">Done! I will look for changes in that file from now on.</string>
-    <string name="fragment_importer_use_remember_the_milk">Use Remember The Milk</string>
+    <string name="fragment_importer_use_remember_the_milk">Login to Remember The Milk</string>
     <string name="fragment_importer_start_fresh_here">Start Completely Fresh</string>
     <string name="fragment_importer_find_file_hint">It is best to it place in one of the default folders</string>
 
@@ -20,4 +20,5 @@
         <item>/Library/Caches/</item>
         <item>/Library/Caches/Tasque</item>
     </string-array>
+
 </resources>

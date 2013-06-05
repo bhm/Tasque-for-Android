@@ -31,6 +31,10 @@ public class MultipleFilesAdapter extends BaseAdapter {
 		return this.files.size();
 	}
 
+	public String getPath(int position) {
+		return files.get(position).getAbsolutePath();
+	}
+
 	@Override
 	public Object getItem(int position) {
 		return files.get(position);
@@ -55,9 +59,11 @@ public class MultipleFilesAdapter extends BaseAdapter {
 		File f = files.get(position);
 		title.setText(f.getParentFile() + "/" + f.getName());
 		Utility.applyFontSize(title);
-		String dateString = (new SimpleDateFormat(SettingsUtil.getDateFromat(context))).format(new Date(f.lastModified()));
+		String dateString = (new SimpleDateFormat(SettingsUtil.getDateFromat(context))).format(new Date(f
+				.lastModified()));
 		date.setText(dateString);
 		size.setText((f.length() / 1024) + "kb");
 		return view;
 	}
+
 }

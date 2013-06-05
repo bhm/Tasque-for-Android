@@ -15,22 +15,22 @@
         android:textSize="@dimen/font_medium" />
 
     <TextView
-        android:id="@+id/fragment_export_to_dropbox_yes"
-        style="@style/ButtonTasque"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="@string/fragment_export_to_dropbox_yes"
-        android:textAllCaps="true"
-        android:textSize="@dimen/font_medium" />
-
-    <TextView
         android:id="@+id/fragment_export_to_dropbox_no"
         style="@style/ButtonTasque"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="@string/fragment_export_to_dropbox_no"
+        android:textAllCaps="true"
+        android:textSize="@dimen/font_medium" />
+
+    <TextView
+        android:id="@+id/fragment_export_to_dropbox_yes"
+        style="@style/ButtonTasque"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/fragment_export_to_dropbox_yes"
         android:textAllCaps="true"
         android:textSize="@dimen/font_medium" />
 

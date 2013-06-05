@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fragment_rtm_auth_feedback"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/abs__background_holo_light"
+    android:gravity="center" >
+
+    <TextSwitcher
+        android:id="@+id/fragment_rtm_auth_feedback_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inAnimation="@anim/slide_in_right"
+        android:outAnimation="@anim/slide_out_left" >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/placeholder"
+            android:textSize="@dimen/font_large"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textSize="@dimen/font_large"
+            android:textStyle="bold" />
+    </TextSwitcher>
+
+    <ProgressBar
+        android:id="@+id/fragment_rtm_auth_feedback_progress"
+        style="@style/ProgressBarTasque"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fragment_rtm_auth_feedback_text"
+        android:indeterminate="true"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin" />
+
+</RelativeLayout>

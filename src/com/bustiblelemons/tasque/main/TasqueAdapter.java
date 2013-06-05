@@ -17,7 +17,7 @@ import android.widget.TextView;
 
 import com.bustiblelemons.tasque.R;
 import com.bustiblelemons.tasque.utilities.Utility;
-import com.bustiblelemons.tasque.utilities.Values.Database.Task;
+import com.bustiblelemons.tasque.utilities.Values.Database.Task.TaskState;
 import com.bustiblelemons.tasque.utilities.Values.Database.Tasks;
 
 public class TasqueAdapter extends android.widget.BaseAdapter {
@@ -51,7 +51,7 @@ public class TasqueAdapter extends android.widget.BaseAdapter {
 	private void setChecked() {
 		while (data.moveToNext()) {
 			int state = data.getInt(data.getColumnIndex(Tasks.STATE));
-			if (state == Task.State.Completed) {
+			if (state == TaskState.Completed) {
 				checked.put(data.getPosition(), true);
 			}
 		}
@@ -113,6 +113,11 @@ public class TasqueAdapter extends android.widget.BaseAdapter {
 		Cursor item = (Cursor) this.getItem(position);
 		return item.getString(item.getColumnIndex(Tasks.NAME));
 	}
+	
+	public String getItemStringId(int position) {
+		return data.moveToPosition(position) ? data.getString(data.getColumnIndex(Tasks.ID)) : "";
+	}
+
 
 	private class ViewHolder {
 		CheckedTextView titleView;

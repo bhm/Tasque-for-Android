@@ -16,6 +16,9 @@ This app uses Color Picker Library, [AmbilWarna](https://code.google.com/p/andro
 
 ## ChangeLog
 
+# 1.2
+* Remember The Milk Backend now available
+
 # 1.0-beta
 * Initial release
 

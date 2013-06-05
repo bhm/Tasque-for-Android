@@ -1,11 +1,11 @@
 package com.bustiblelemons.tasque.main;
 
-import static com.bustiblelemons.tasque.utilities.Values.TAG;
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -25,26 +25,28 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.bustiblelemons.tasque.R;
+import com.bustiblelemons.tasque.database.Database;
+import com.bustiblelemons.tasque.frontend.Task;
 import com.bustiblelemons.tasque.main.TasqueGroupFragment.OnRefreshCategory;
 import com.bustiblelemons.tasque.main.TasqueGroupFragment.OnShowNotesFragment;
-import com.bustiblelemons.tasque.utilities.Database;
 import com.bustiblelemons.tasque.utilities.Values.FragmentArguments;
 
 public class CompletedTasksFragment extends SherlockFragment implements OnItemClickListener, OnItemLongClickListener,
 		OnTouchListener {
 
+	public static final String FRAGMENT_TAG = "completed";
 	private View view;
 	private ListView listView;
 	private TasqueAdapter adapter;
 	private Context context;
 	private Bundle args;
 	private Cursor data;
-	private int categoryID;
+	private String listId;
 	private boolean DELETING_ENABLED;
 	private ActionBar abar;
 
 	public interface OnShowCompletedTasksFragment {
-		public void showCompletedTasksFragment(int categoryID);
+		public void onShowCompletedTasksFragment(String listId);
 	}
 
 	public interface OnTaskMarkedActive {
@@ -68,8 +70,8 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 		super.onCreate(savedInstanceState);
 		this.context = getActivity().getApplicationContext();
 		this.args = getArguments();
-		this.categoryID = args.getInt(FragmentArguments.ID);
-		this.data = Database.getCompletedTasks(context, String.valueOf(categoryID));
+		this.listId = args.getString(FragmentArguments.ID);
+		this.data = Database.getCompletedTasks(context, listId);
 		abar = getSherlockActivity().getSupportActionBar();
 		abar.setDisplayShowCustomEnabled(false);
 		abar.setDisplayShowTitleEnabled(true);
@@ -117,8 +119,9 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 			getActivity().supportInvalidateOptionsMenu();
 			return true;
 		case R.id.menu_completed_delete_ok:
-			Database.markDeleted(context, adapter.getIDsToDelete());
-			data = Database.getCompletedTasks(context, String.valueOf(categoryID));
+			ArrayList<String> tasksToDelete = adapter.getIDsToDelete();
+			Task.delete(context, listId, tasksToDelete);
+			data = Database.getCompletedTasks(context, listId);
 		case R.id.menu_completed_delete_cancel:
 			this.disableDeleting();
 			return true;
@@ -131,7 +134,7 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 		input = (EditText) abar.getCustomView().findViewById(R.id.actionbar_input);
 		String task = input.getText().toString();
 		if (task.length() > 0) {
-			Database.insertNewTask(context, String.valueOf(categoryID), task);
+			Database.newTask(context, listId, task);
 		}
 	}
 
@@ -163,26 +166,27 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 			this.adapter.markForDeletion(arg2);
 		} else {
 			this.adapter.toggle(arg2);
-			Database.markActive(context, String.valueOf(adapter.getItemId(arg2)));
+			String taskId = String.valueOf(adapter.getItemId(arg2));
+			Task.markActive(context, listId, taskId, adapter.getTaskName(arg2));
 			refreshCategory.onRefreshCategory();
-			this.loadData(categoryID);
+			this.loadData(listId);
 		}
 	}
 
 	@Override
-	public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-		showNotesFragment.onShowNotesFragment((int) adapter.getItemId(arg2), adapter.getTaskName(arg2));
+	public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+		showNotesFragment.onShowNotesFragment(listId, adapter.getItemStringId(position), adapter.getTaskName(position));
 		return true;
 	}
 
 	public void refreshData() {
-		this.data = Database.getCompletedTasks(context, String.valueOf(this.categoryID));
+		this.data = Database.getCompletedTasks(context, listId);
 		adapter = new TasqueAdapter(context, data);
 		listView.setAdapter(adapter);
 	}
 
-	public void loadData(Integer categoryID) {
-		data = Database.getCompletedTasks(context, String.valueOf(categoryID));
+	public void loadData(String categoryID) {
+		data = Database.getCompletedTasks(context, categoryID);
 		adapter = new TasqueAdapter(context, data);
 		listView.setAdapter(adapter);
 	}
@@ -190,5 +194,9 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		return true;
+	}
+
+	public void loadData(Integer position) {
+		this.loadData(String.valueOf(position));
 	}
 }

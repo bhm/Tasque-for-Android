@@ -9,6 +9,9 @@
         android:fragment="com.bustiblelemons.tasque.main.SettingsActivity$DateTimePreferenceFragment"
         android:title="@string/pref_header_date_time" />
     <header
+        android:fragment="com.bustiblelemons.tasque.main.SettingsActivity$BackendRTMPreferenceFragment"
+        android:title="@string/pref_header_backend_rtm" />
+    <header
         android:fragment="com.bustiblelemons.tasque.main.SettingsActivity$AboutPreferenceFragment"
         android:title="@string/pref_header_about" />
 

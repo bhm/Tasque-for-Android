@@ -21,14 +21,14 @@ import com.bustiblelemons.tasque.utilities.Values.Database.Notes;
 
 public class NotesAdapter extends BaseAdapter {
 
-	private Cursor notes;
+	private Cursor data;
 	private Context context;
 	private SparseBooleanArray checked;
 
-	public NotesAdapter(Context context, Cursor notes) {
+	public NotesAdapter(Context context, Cursor data) {
 		this.context = context;
-		this.notes = notes;
-		Log.d(TAG, "Notes: " + notes.getCount() + " " + notes.getColumnCount());
+		this.data = data;
+		Log.d(TAG, "Notes: " + data.getColumnCount() + " " + data.getCount());
 		this.checked = new SparseBooleanArray();
 	}
 
@@ -51,14 +51,15 @@ public class NotesAdapter extends BaseAdapter {
 
 	/**
 	 * Returns all selected data.
+	 * 
 	 * @return
 	 */
 	public ArrayList<String> getSelected() {
 		ArrayList<String> r = new ArrayList<String>();
-		for (int i=0; i<checked.size(); i++) {
+		for (int i = 0; i < checked.size(); i++) {
 			if (checked.valueAt(i)) {
-				notes.moveToPosition(checked.keyAt(i));
-				r.add(notes.getString(notes.getColumnIndex(Notes.TEXT)));
+				data.moveToPosition(checked.keyAt(i));
+				r.add(data.getString(data.getColumnIndex(Notes.ID)));
 			}
 		}
 		return r;
@@ -70,17 +71,25 @@ public class NotesAdapter extends BaseAdapter {
 
 	@Override
 	public int getCount() {
-		return notes.getCount();
+		return data.getCount();
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return notes.moveToPosition(position) ? notes : notes;
+		return data.moveToPosition(position) ? data : data;
 	}
 
 	@Override
 	public long getItemId(int position) {
 		return 0;
+	}
+
+	public String getNoteId(int position) {
+		return data.moveToPosition(position) ? data.getString(data.getColumnIndex(Notes.ID)) : "";
+	}
+
+	public String getNoteBody(int position) {
+		return data.moveToPosition(position) ? data.getString(data.getColumnIndex(Notes.TEXT)) : "";
 	}
 
 	private class ViewHolder {
@@ -107,12 +116,11 @@ public class NotesAdapter extends BaseAdapter {
 		} else {
 			holder = (ViewHolder) convertView.getTag();
 		}
-		if (notes.moveToPosition(position)) {
-			String noteText = notes.getString(notes.getColumnIndex(Notes.TEXT));
+		if (data.moveToPosition(position)) {
+			String noteText = data.getString(data.getColumnIndex(Notes.TEXT));
 			holder.note.setChecked(checked.get(position));
 			holder.setNote(noteText);
 		}
 		return convertView;
 	}
-
 }

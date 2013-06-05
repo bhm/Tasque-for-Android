@@ -168,9 +168,6 @@
     <string name="pref_date_format_show_hour_ampm_title">AM/PM Format</string>
     <string name="pref_date_format_show_hour_ampm_summary">Well, you didn\'t choose where you were born. I\'d chosen to be condescening.\n</string>
 
-    <!-- Marking tasks -->
-    <string name="pref_show_completed_key">show_completed</string>
-    <string name="pref_show_completed_title">Show completed tasks</string>
     <!-- INPUT -->
     <string name="pref_auto_cap_characters_key">auto_cap_characters</string>
     <string name="pref_auto_cap_characters_title">Capitalize words.</string>
@@ -200,5 +197,8 @@
     <string name="pref_about_license_summary">Tasque, both for Android and Linux/Windows/Mac are licensed under MIT.\nSearch for <b>Tasque for Android</b> on Github page.\n</string>
     <string name="pref_about_contact_summary">You wouldn\'t attach a bear.\n</string>
     <string name="pref_about_contact_title">Contact Me!</string>
+
+    <!-- DEVELOPER -->
+    <string name="pref_developer_category_options">Developer Options</string>
 
 </resources>

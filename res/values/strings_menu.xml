@@ -11,6 +11,7 @@
     <string name="menu_start_deleting_tasks">Delete Tasks</string>
     <string name="menu_show_completed">Completed Tasks</string>
     <string name="menu_set_default">Pin as default</string>
+    <string name="menu_rtm_refresh">Refresh</string>
     <string name="menu_unset_default">Unpin as default</string>
     <string name="menu_change_database_file">Swap database</string>
     <!-- Categories -->

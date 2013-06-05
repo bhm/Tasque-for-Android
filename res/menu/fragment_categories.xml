@@ -2,19 +2,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/menu_delete_categories_start"
-        android:icon="@drawable/ic_action_delete"
-        android:showAsAction="ifRoom"
-        android:title="@string/menu_start_deleting_categories"/>
-    <item
         android:id="@+id/menu_categories_add"
         android:icon="@drawable/ic_action_add"
+        android:orderInCategory="10"
         android:showAsAction="always"
         android:title="@string/menu_add"/>
     <item
-        android:id="@+id/menu_ok"
-        android:icon="@drawable/ic_action_ok"
-        android:showAsAction="always"
-        android:title="@string/menu_import_ok"/>
+        android:id="@+id/menu_delete_categories_start"
+        android:icon="@drawable/ic_action_delete"
+        android:orderInCategory="40"
+        android:showAsAction="collapseActionView"
+        android:title="@string/menu_start_deleting_categories"/>
+    <item
+        android:id="@+id/menu_settings"
+        android:icon="@drawable/ic_action_settings"
+        android:orderInCategory="100"
+        android:showAsAction="collapseActionView"
+        android:title="@string/menu_settings"/>
 
 </menu>

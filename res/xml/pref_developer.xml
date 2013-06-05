@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="@string/pref_developer_category_options" >
+        <CheckBoxPreference
+            android:key="@string/pref_backend_use_rtm_key"
+            android:summary="@string/pref_backend_use_rtm_summary"
+            android:title="@string/pref_backend_use_rtm_title" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -3,8 +3,6 @@ package com.bustiblelemons.tasque.main;
 import java.util.List;
 import java.util.Map;
 
-import com.bustiblelemons.tasque.R;
-
 import yuku.ambilwarna.widget.AmbilWarnaPreference;
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -14,10 +12,11 @@ import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
+
+import com.bustiblelemons.tasque.BuildConfig;
+import com.bustiblelemons.tasque.R;
 
 public class SettingsActivity extends PreferenceActivity {
 	private static final boolean ALWAYS_SIMPLE_PREFS = false;
@@ -25,7 +24,7 @@ public class SettingsActivity extends PreferenceActivity {
 	private static Context context;
 	private static String regex;
 	private static String currentlyPrefix;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -53,9 +52,11 @@ public class SettingsActivity extends PreferenceActivity {
 		bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_font_size_due_date_key)));
 		bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_font_size_list_key)));
 		bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_font_size_input_key)));
-		PreferenceCategory fakeHeader = new PreferenceCategory(this);
-        fakeHeader.setTitle(R.string.pref_time_category_title);
-        getPreferenceScreen().addPreference(fakeHeader);
+		addPreferencesFromResource(R.xml.pref_backend_rtm);
+		bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_backend_use_rtm_key)));
+		bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_backend_rtm_use_data_key)));
+		bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_backend_rtm_synchronization_interval_key)));
+		bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_backend_rtm_synchronization_from_last_key)));
 		addPreferencesFromResource(R.xml.pref_date_time);
 		bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_date_show_date_key)));
 		bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_date_format_key)));
@@ -64,8 +65,10 @@ public class SettingsActivity extends PreferenceActivity {
 		bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_use_color_key)));
 		bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_color_today_key)));
 		bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_color_overdue_key)));
-
 		addPreferencesFromResource(R.xml.pref_about);
+		if (BuildConfig.DEBUG) {
+			// addPreferencesFromResource(R.xml.pref_developer);
+		}
 	}
 
 	@Override
@@ -161,6 +164,20 @@ public class SettingsActivity extends PreferenceActivity {
 			bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_date_format_show_hour_ampm_key)));
 			bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_color_today_key)));
 			bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_color_overdue_key)));
+		}
+	}
+
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	public static class BackendRTMPreferenceFragment extends PreferenceFragment {
+		@Override
+		public void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			context = getActivity().getApplicationContext();
+			addPreferencesFromResource(R.xml.pref_backend_rtm_fragment);
+			bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_backend_use_rtm_key)));
+			bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_backend_rtm_use_data_key)));
+			bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_backend_rtm_synchronization_interval_key)));
+			bindPreferenceSummaryToValue(findPreference(context.getString(R.string.pref_backend_rtm_synchronization_from_last_key)));
 		}
 	}
 

@@ -1,29 +1,42 @@
 package com.bustiblelemons.tasque.main;
 
+import it.bova.rtmapi.DateParser;
+import it.bova.rtmapi.ParsingException;
+import it.bova.rtmapi.Token;
+
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-
-import com.bustiblelemons.tasque.R;
-import com.bustiblelemons.tasque.utilities.Database;
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.bustiblelemons.tasque.R;
+import com.bustiblelemons.tasque.database.Database;
+import com.bustiblelemons.tasque.utilities.PermissionParser;
+import com.bustiblelemons.tasque.utilities.Values.JSONToken;
+
 public class SettingsUtil {
 
-	private static SharedPreferences getPreferencesFile(Context context) {
+	private synchronized static SharedPreferences getPreferencesFile(Context context) {
 		return PreferenceManager.getDefaultSharedPreferences(context);
 	}
 
-	public static int getTimeOut(Context context) {
-		return SettingsUtil.getPreferencesFile(context).getInt(context.getString(R.string.pref_time_out_key), 5);
-	}
-
-	public static boolean isFirstRun(Context context) {
-		return SettingsUtil.getPreferencesFile(context).getBoolean(context.getString(R.string.pref_first_run), true);
+	/**
+	 * Saves default values from all preference screens.
+	 * 
+	 * @param context
+	 * @param reset
+	 *            true to overwrite saved values.
+	 */
+	public static void setDefaultValues(Context context, boolean reset) {
+		PreferenceManager.setDefaultValues(context, R.xml.pref_general, reset);
+		PreferenceManager.setDefaultValues(context, R.xml.pref_date_time, reset);
+		PreferenceManager.setDefaultValues(context, R.xml.pref_backend_rtm, reset);
 	}
 
 	public static void firstRunDone(Context context) {
@@ -31,9 +44,18 @@ public class SettingsUtil {
 				.commit();
 	}
 
+	public static boolean isFirstRun(Context context) {
+		return SettingsUtil.getPreferencesFile(context).getBoolean(context.getString(R.string.pref_first_run), true);
+	}
+
 	public static boolean hideKeyboard(Context context) {
 		return SettingsUtil.getPreferencesFile(context).getBoolean(context.getString(R.string.pref_hide_keyboard_key),
 				false);
+	}
+
+	// INPUT
+	public static int getTimeOut(Context context) {
+		return SettingsUtil.getPreferencesFile(context).getInt(context.getString(R.string.pref_time_out_key), 5);
 	}
 
 	public static boolean autoCap(Context context) {
@@ -41,6 +63,7 @@ public class SettingsUtil {
 				context.getString(R.string.pref_auto_cap_characters_key), true);
 	}
 
+	// CATEGORIES
 	public static void setDefaultCategoryId(Context context, int categoryID) {
 		SettingsUtil.getPreferencesFile(context).edit()
 				.putInt(context.getString(R.string.pref_default_category_key), categoryID).commit();
@@ -54,6 +77,10 @@ public class SettingsUtil {
 	public static int getDefaultCategoryId(Context context) {
 		return SettingsUtil.getPreferencesFile(context)
 				.getInt(context.getString(R.string.pref_default_category_key), 0);
+	}
+
+	public static String getDefaultCategoryStringId(Context context) {
+		return String.valueOf(SettingsUtil.getDefaultCategoryId(context));
 	}
 
 	public static boolean isDefaultCategory(Context context, int categoryId) {
@@ -107,7 +134,7 @@ public class SettingsUtil {
 	}
 
 	public static void setSelectedCategoriesToAll(Context context) {
-		ArrayList<String> categories = Database.getAllCategoryIDS(context);
+		ArrayList<String> categories = Database.getCategoriesIds(context);
 		SettingsUtil.setSelectedCategories(context, categories);
 	}
 
@@ -193,4 +220,100 @@ public class SettingsUtil {
 	public static boolean startedFresh(Context context) {
 		return SettingsUtil.getStartedFresh(context);
 	}
+
+	/**
+	 * RTM BACKEND
+	 */
+	public static boolean getUseRTMBackend(Context context) {
+		return SettingsUtil.getPreferencesFile(context).getBoolean(
+				context.getString(R.string.pref_backend_use_rtm_key), false);
+	}
+
+	public static boolean useRTMBackend(Context context) {
+		return SettingsUtil.getUseRTMBackend(context);
+	}
+
+	public static void setUseRTMBackend(Context context, boolean useRTM) {
+		SettingsUtil.getPreferencesFile(context).edit()
+				.putBoolean(context.getString(R.string.pref_backend_use_rtm_key), useRTM).commit();
+	}
+
+	public static void saveRTMToken(Context context, Token token) {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(JSONToken.Permission, token.getPermission().toString());
+			o.put(JSONToken.Token, token.getToken());
+			o.put(JSONToken.UserID, token.getUserId());
+			o.put(JSONToken.UserName, token.getUserName());
+			o.put(JSONToken.FullUserName, token.getFullName());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		SettingsUtil.getPreferencesFile(context).edit()
+				.putString(context.getString(R.string.pref_backend_rtm_token), o.toString()).commit();
+	}
+
+	public static Token getRTMToken(Context context) {
+		String t = SettingsUtil.getPreferencesFile(context).getString(
+				context.getString(R.string.pref_backend_rtm_token), "");
+		JSONObject o;
+		Token token = null;
+		try {
+			o = new JSONObject(t);
+			if (t.length() > 0) {
+				token = new Token(PermissionParser.parse(o.getString(JSONToken.Permission)), o.getString(
+						JSONToken.Token).toString(), o.getString(JSONToken.UserID), o.getString(JSONToken.UserName),
+						o.getString(JSONToken.FullUserName));
+			}
+
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return token;
+	}
+
+	public static void setRTMLastSync(Context context, Date date) {
+		SettingsUtil.getPreferencesFile(context).edit()
+				.putString(context.getString(R.string.pref_backend_rtm_last_sync), DateParser.toISO8601(date)).commit();
+	}
+
+	/**
+	 * 
+	 * @param context
+	 * @return if not found will return a date two weeks from now.
+	 */
+	public static Date getRTMLastSync(Context context) {
+		Date r = new Date(System.currentTimeMillis() - SettingsUtil.getRTMSynchronizationFrom(context));
+		try {
+			String dateString = SettingsUtil.getPreferencesFile(context).getString(
+					context.getString(R.string.pref_backend_rtm_last_sync), "");
+			if (dateString.length() > 0) {
+				r = DateParser.parseDate(dateString);
+			}
+		} catch (ParsingException e) {
+			e.printStackTrace();
+			return r;
+		}
+		return r;
+	}
+
+	private static long getRTMSynchronizationFrom(Context context) {
+		return Long.valueOf(SettingsUtil.getPreferencesFile(context).getString(
+				context.getString(R.string.pref_backend_rtm_synchronization_from_last_key), "1800000"));
+	}
+
+	public static boolean useMobileData(Context context) {
+		return SettingsUtil.getPreferencesFile(context).getBoolean(
+				context.getString(R.string.pref_backend_rtm_use_data_key), true);
+	}
+
+	public static Integer getRTMIntervalUpdate(Context context) {
+		return Integer.valueOf(SettingsUtil.getPreferencesFile(context).getString(
+				context.getString(R.string.pref_backend_rtm_synchronization_interval_key), "1800000"));
+	}
+	
+	public static boolean useRTMUpdateService(Context context) {
+		return !SettingsUtil.getPreferencesFile(context).getBoolean(context.getString(R.string.pref_backend_rtm_synchronization_only_running_key), false);
+	}
+
 }

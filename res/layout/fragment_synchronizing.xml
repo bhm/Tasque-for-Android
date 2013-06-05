@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="bottom|center"
+    android:paddingLeft="@dimen/font_very_large"
+    android:paddingRight="@dimen/font_very_large" >
+
+    <ProgressBar
+        android:id="@+id/fragment_synchronizing_progress"
+        style="@style/ProgressBarTasque"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/abs__background_holo_light"
+        android:indeterminate="true"
+        android:paddingLeft="@dimen/font_very_large"
+        android:paddingRight="@dimen/font_very_large"
+        android:progress="50" />
+
+    <TextView
+        android:id="@+id/fragment_synchronizing_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/fragment_synchronizing_title" />
+
+    <ImageView
+        android:id="@+id/fragment_synchronizing_cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:contentDescription="@string/fragment_synchronizing_cancel_description"
+        android:layout_alignRight="@id/fragment_synchronizing_progress"
+        android:layout_alignBottom="@id/fragment_synchronizing_title"
+        android:background="@color/abs__background_holo_light"
+        android:src="@drawable/ic_action_cancel_dark" />
+
+</RelativeLayout>

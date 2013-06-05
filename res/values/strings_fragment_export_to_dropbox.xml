@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <string name="fragment_export_to_dropbox_title">One more question</string>
-    <string name="fragment_export_to_dropbox_question">Should I push the database to <b>\n%1$s\n</b> on each exit?\n\n This way you can synchronize it to other devices</string>
-    <string name="fragment_export_to_dropbox_yes">Please do</string>
-    <string name="fragment_export_to_dropbox_no">No, do not do this</string>
-
-</resources>

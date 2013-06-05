@@ -2,9 +2,7 @@ package com.bustiblelemons.tasque.main;
 
 import static com.bustiblelemons.tasque.utilities.Values.TAG;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Map.Entry;
 
 import android.app.Activity;
 import android.content.Context;
@@ -12,6 +10,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -21,7 +20,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -31,11 +29,12 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.bustiblelemons.tasque.R;
+import com.bustiblelemons.tasque.database.Database;
+import com.bustiblelemons.tasque.frontend.Task;
 import com.bustiblelemons.tasque.main.CategoriesFragment.OnShowCategoriesFragment;
 import com.bustiblelemons.tasque.main.CompletedTasksFragment.OnShowCompletedTasksFragment;
-import com.bustiblelemons.tasque.splash.MultipleFilesChooserFragment.OnMultipleFilesDetected;
-import com.bustiblelemons.tasque.utilities.Database;
-import com.bustiblelemons.tasque.utilities.Utility;
+import com.bustiblelemons.tasque.rtm.RTMBackend;
+import com.bustiblelemons.tasque.rtm.RTMSyncService.OnRTMRefresh;
 import com.bustiblelemons.tasque.utilities.Values.FragmentArguments;
 
 public class TasqueGroupFragment extends SherlockFragment implements OnItemLongClickListener, OnItemClickListener,
@@ -47,13 +46,19 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 	private TasqueAdapter adapter;
 	private Bundle args;
 	private int categoryID;
+	private String listId;
 	private Cursor data;
 	private Context context;
-	private EditText inputField;
 	private ActionBar abar;
 
 	public interface OnShowNotesFragment {
-		public void onShowNotesFragment(Integer taskID, String taskName);
+		/**
+		 * 
+		 * @param listId
+		 * @param taskID
+		 * @param taskName
+		 */
+		public void onShowNotesFragment(String listId, String taskID, String taskName);
 	}
 
 	private OnShowNotesFragment showNotesFragment;
@@ -62,37 +67,42 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 		public void setDefaultCategory(int categoryID);
 	}
 
+	public interface OnSetActionBarForInput {
+		public void setActionBarForInput();
+	}
+
+	private OnSetActionBarForInput setActionBarForInput;
+
 	private OnSetDefaultCategory setDefaultCategoryCallback;
 
 	private OnShowCategoriesFragment onShowCategoriesFragment;
-	private OnMultipleFilesDetected multipleFilesDetected;
 	private OnShowCompletedTasksFragment showCompletedTasksFragment;
-	private String categoryName;
 
 	public interface OnRefreshCategory {
 		public boolean onRefreshCategory();
 	}
+	
+	private OnRTMRefresh rtmRefresh;
 
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
+		setActionBarForInput = (OnSetActionBarForInput) activity;
 		showNotesFragment = (OnShowNotesFragment) activity;
 		setDefaultCategoryCallback = (OnSetDefaultCategory) activity;
 		onShowCategoriesFragment = (OnShowCategoriesFragment) activity;
-		multipleFilesDetected = (OnMultipleFilesDetected) activity;
 		showCompletedTasksFragment = (OnShowCompletedTasksFragment) activity;
+		rtmRefresh = (OnRTMRefresh) activity;
 	}
 
-	public static TasqueGroupFragment newInstance(Entry<Integer, String> category) {
+	public static TasqueGroupFragment newInstance(Pair<Integer, String> category) {
 		TasqueGroupFragment f = new TasqueGroupFragment();
 		Bundle args = new Bundle();
-		String categoryName = "";
-		int categoryID = -1;
-		categoryName = category.getValue();
-		categoryID = category.getKey();
-		Log.d(TAG, "newInstance for " + categoryID + " " + categoryName);
-		args.putString(FragmentArguments.CATEGORY, categoryName);
-		args.putInt(FragmentArguments.ID, categoryID);
+		int id = category.first;
+		String name = category.second;
+		Log.d(TAG, "newInstance for " + id + " " + name);
+		args.putString(FragmentArguments.CATEGORY, name);
+		args.putInt(FragmentArguments.ID, id);
 		f.setArguments(args);
 		return f;
 	}
@@ -115,7 +125,8 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 		args = getArguments();
 		if (args != null) {
 			categoryID = args.getInt(FragmentArguments.ID);
-			categoryName = args.getString(FragmentArguments.CATEGORY);
+			listId = String.valueOf(categoryID);
+			// categoryName = args.getString(FragmentArguments.CATEGORY);
 		}
 		this.loadData();
 		context = getActivity().getApplicationContext();
@@ -127,21 +138,18 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 	@Override
 	public void onStart() {
 		super.onStart();
-		inputField = (EditText) abar.getCustomView().findViewById(R.id.actionbar_input);
 	}
 
 	public void loadData() {
 		try {
 			switch (categoryID) {
 			case FragmentArguments.ALL_ID:
-				this.data = Database.getAllSelectedTasks(context);
+				this.data = Database.getTasks(context);
 				break;
 			default:
-				this.data = Database.getTasks(context, categoryID);
+				this.data = Database.getTasks(context, listId);
 				break;
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
 		} catch (NullPointerException e) {
 			e.printStackTrace();
 		}
@@ -149,27 +157,30 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 
 	public void refreshData() {
 		this.loadData();
+		this.adapter.notifyDataSetChanged();
 		adapter = new TasqueAdapter(context, data);
 		listView.setAdapter(adapter);
-		if (inputField != null) {
-			inputField.setHint(String.format(context.getString(R.string.fragment_task_group_intput_field_hint),
-					categoryName));
-		}
 	}
 
-	public void addTask(TextView v) {
-		String taskName = inputField.getText().toString();
+	/**
+	 * FIXME Going back from the completed fragment prevents adding
+	 * 
+	 * @param v
+	 */
+	public boolean addTask(TextView v) {
+		String taskName = v.getText().toString();
 		if (taskName.length() > 0) {
-			Database.insertNewTask(context, String.valueOf(categoryID), taskName);
-			inputField.setText("");
+			Task.add(context, listId, taskName);
+			v.setText("");
 			this.refreshData();
+			return true;
 		}
+		return false;
 	}
 
 	public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 		if (event != null) {
-			this.addTask(v);
-			return true;
+			return this.addTask(v);
 		}
 		return false;
 	}
@@ -185,9 +196,12 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 		// inflater.inflate(R.menu.tasque_group_change_database_file, menu);
 		// }
 		if (SettingsUtil.isDefaultCategory(context, categoryID)) {
-			inflater.inflate(R.menu.tasque_group_fragment_default, menu);
+			inflater.inflate(R.menu.fragment_tasque_group_default, menu);
 		} else {
-			inflater.inflate(R.menu.tasque_group_fragment, menu);
+			inflater.inflate(R.menu.fragment_tasque_group, menu);
+		}
+		if (RTMBackend.useRTM(context)) {
+			inflater.inflate(R.menu.rtm_refresh_option, menu);
 		}
 		if (DELETING_IN_PROGRESS) {
 			menu.clear();
@@ -209,28 +223,18 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 		abar.setTitle(R.string.fragment_task_group_deleting_title);
 	}
 
-	public void setActionBarForInput() {
-		abar = getSherlockActivity().getSupportActionBar();
-		inputField = (EditText) abar.getCustomView().findViewById(R.id.actionbar_input);
-		abar.setDisplayShowCustomEnabled(true);
-		abar.setDisplayShowTitleEnabled(false);
-		abar.setTitle(R.string.app_name);
-		inputField.setHint(String.format(context.getString(R.string.fragment_task_group_intput_field_hint),
-				categoryName));
-	}
-
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_add_new_task:
-			this.addTask(null);
+			this.addTask(Tasque.getActionBarInput());
 			this.refreshData();
 			return true;
 		case R.id.menu_manage_cateogies:
 			onShowCategoriesFragment.onShowCategoriesFragment();
 			return true;
 		case R.id.menu_show_completed:
-			showCompletedTasksFragment.showCompletedTasksFragment(categoryID);
+			showCompletedTasksFragment.onShowCompletedTasksFragment(listId);
 			return true;
 		case R.id.menu_settings:
 			Intent settings = new Intent(context, SettingsActivity.class);
@@ -244,8 +248,12 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 			setDefaultCategoryCallback.setDefaultCategory(0);
 			getActivity().supportInvalidateOptionsMenu();
 			return true;
+		case R.id.menu_rtm_refresh:
+			rtmRefresh.startRTMRefreshService(context);
+			return true;
 		case R.id.menu_change_database_file:
-			multipleFilesDetected.onShowMultipleFilesDetected(Utility.getSyncedDatabasePaths(context), false);
+			// multipleFilesDetected.onShowMultipleFilesDetected(Utility.getSyncedDatabasePaths(context),
+			// false);
 			return true;
 		case R.id.menu_start_deleting:
 			this.startDeleting();
@@ -253,9 +261,8 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 			getActivity().supportInvalidateOptionsMenu();
 			return true;
 		case R.id.menu_delete_tasks_ok:
-			ArrayList<String> tasksToDelete = new ArrayList<String>();
-			tasksToDelete = adapter.getIDsToDelete();
-			Database.markDeleted(context, tasksToDelete);
+			ArrayList<String> tasksToDelete = adapter.getIDsToDelete();
+			Task.delete(context, listId, tasksToDelete);
 		case R.id.menu_delete_tasks_cancel:
 			this.disableDeleting();
 			return true;
@@ -266,7 +273,7 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 
 	private void disableDeleting() {
 		this.refreshData();
-		this.setActionBarForInput();
+		setActionBarForInput.setActionBarForInput();
 		DELETING_IN_PROGRESS = false;
 		getActivity().supportInvalidateOptionsMenu();
 	}
@@ -277,14 +284,15 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 			adapter.markForDeletion(arg2);
 		} else {
 			adapter.toggle(arg2);
-			Database.setMarkTaskDone(context, String.valueOf(adapter.getItemId(arg2)));
+			String taskId = String.valueOf(adapter.getItemId(arg2));
+			Task.markDone(context, listId, taskId, adapter.getTaskName(arg2));
 			this.refreshData();
 		}
 	}
 
 	@Override
-	public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-		showNotesFragment.onShowNotesFragment((int) adapter.getItemId(arg2), adapter.getTaskName(arg2));
+	public boolean onItemLongClick(AdapterView<?> arg0, View view, int position, long arg3) {
+		showNotesFragment.onShowNotesFragment(listId, adapter.getItemStringId(position), adapter.getTaskName(position));
 		return true;
 	}
 
@@ -294,6 +302,6 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 	}
 
 	public void resetInputField() {
-		this.setActionBarForInput();
+		setActionBarForInput.setActionBarForInput();
 	}
 }

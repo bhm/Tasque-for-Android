@@ -15,6 +15,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import com.bustiblelemons.tasque.R;
+import com.bustiblelemons.tasque.database.DatabaseAdapter;
 import com.bustiblelemons.tasque.main.SettingsUtil;
 
 import android.content.Context;
@@ -158,19 +159,19 @@ public class Utility {
 	 * via a service.
 	 * 
 	 * @param context
-	 * @param syncedDatabase
+	 * @param exportFile
 	 *            the full absolute file path saved in settings.
 	 * @return true on successful push of a new file. Will fail if external
 	 *         memory is not available.
 	 */
-	public static boolean backupSynced(Context context, String syncedDatabase) {
-		return backupSynced(context, new File(syncedDatabase));
+	public static boolean backupSynced(Context context, String exportFile) {
+		return backupSynced(context, new File(exportFile));
 	}
 
-	public static boolean backupSynced(Context context, File syncedDatabase) {
+	public static boolean backupSynced(Context context, File exportFile) {
 		if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
 			Log.d(TAG, "Doing backup first");
-			return syncedDatabase.exists() ? syncedDatabase.renameTo(new File(syncedDatabase + ".backup")) : false; 
+			return exportFile.exists() ? exportFile.renameTo(new File(exportFile + ".backup")) : false; 
 		} else {
 			return false;
 		}
@@ -194,13 +195,18 @@ public class Utility {
 				Log.d(TAG, "Export path exists: " + syncedPath);
 				if (Utility.exportFileExists(context)) {
 					Log.d(TAG, "Export file exists");
-					File syncedDatabase = Utility.getExportFile(context);
+					File exportFile = Utility.getExportFile(context);
 					String state = Environment.getExternalStorageState();
 					if (Environment.MEDIA_MOUNTED.equals(state)) {
 						Log.d(TAG, "External available");
-						return backupSynced(context, syncedDatabase) ? copy(appDatabase, syncedDatabase) : false;
+						return backupSynced(context, exportFile) ? copy(appDatabase, exportFile) : false;
 					}
+				} else {
+					new File(new File(syncedPath).getParent()).mkdirs();
+					return copy(Utility.getAppDatabaseFile(context), Utility.getExportFile(context));
 				}
+			} else {
+				return copy(Utility.getAppDatabaseFile(context), Utility.getExportFile(context));
 			}
 		}
 		return false;
@@ -217,6 +223,8 @@ public class Utility {
 	public static boolean isExternalNewer(Context context) {
 		File localDB = Utility.getAppDatabaseFile(context);
 		File externalDB = new File(Utility.getSyncedDatabasePath(context));
+		Log.d(TAG, "Local file date: " + new SimpleDateFormat().format((new Date(localDB.lastModified()))));
+		Log.d(TAG, "External date: " + new SimpleDateFormat().format(new Date(externalDB.lastModified())));
 		return (localDB.lastModified() < externalDB.lastModified()) ? true : false;
 	}
 
@@ -230,28 +238,28 @@ public class Utility {
 	public static boolean copyDatabase(Context context, String path) {
 		File appDatabaseDir = new File(new File(context.getApplicationInfo().dataDir), "databases");
 		File appDatabase = new File(appDatabaseDir, DatabaseAdapter.DATABASE_NAME);
-		File syncedDatabase = new File(path);
+		File exportFile = new File(path);
 		SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss yyyy/MM/dd");
 		Log.d(TAG,
 				appDatabaseDir.getAbsolutePath() + "\n" + appDatabase.getAbsolutePath() + "\n"
-						+ syncedDatabase.getAbsolutePath());
-		Log.d(TAG, "Synced timestamp: " + format.format(new Date(syncedDatabase.lastModified())));
+						+ exportFile.getAbsolutePath());
+		Log.d(TAG, "Synced timestamp: " + format.format(new Date(exportFile.lastModified())));
 		Log.d(TAG, "App Database timestamp: " + format.format(new Date(appDatabase.lastModified())));
 		if (!appDatabaseDir.exists()) {
 			appDatabaseDir.mkdir();
 		}
 		if (!appDatabase.exists()) {
 			Log.d(TAG, "No previous copy.");
-			if (syncedDatabase.exists()) {
-				return Utility.copy(syncedDatabase, appDatabase);
+			if (exportFile.exists()) {
+				return Utility.copy(exportFile, appDatabase);
 			} else {
-				Log.d(TAG, "Did not find " + syncedDatabase.getAbsolutePath());
+				Log.d(TAG, "Did not find " + exportFile.getAbsolutePath());
 			}
 		} else {
 			Log.d(TAG, "Found previous copy");
-			if (appDatabase.lastModified() < syncedDatabase.lastModified()) {
+			if (appDatabase.lastModified() < exportFile.lastModified()) {
 				Log.d(TAG, "Local file is older. Copy");
-				return Utility.copy(syncedDatabase, appDatabase);
+				return Utility.copy(exportFile, appDatabase);
 			}
 		}
 		return false;
@@ -324,6 +332,10 @@ public class Utility {
 		t.setTime(new Date());
 		d.setTime(new Date(date * 1000));
 		return t.compareTo(d) > 0 ? true : false;
+	}
+
+	public static Date getFortnightDate(Context context) {		
+		return new Date(System.currentTimeMillis() - 1000*60*60*24*14);
 	}
 
 }

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_fragment_categories_edit_name_cancel"
+        android:icon="@drawable/ic_action_cancel"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:title="@string/menu_delete_cancel"/>
+    <item
+        android:id="@+id/menu_fragment_categories_edit_name_ok"
+        android:icon="@drawable/ic_action_ok"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:title="@string/menu_delete_ok"/>
+
+</menu>

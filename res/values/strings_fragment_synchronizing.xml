@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="fragment_synchronizing_title">Synchronizing</string>
+    <string name="fragment_synchronizing_cancel_description">Cancel synchroniziation</string>
+    
+</resources>
