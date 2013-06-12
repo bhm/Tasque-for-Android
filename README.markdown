@@ -15,9 +15,9 @@ You will also need the Milk.java class file containing API_KEY and API_SECRET. I
 
 ## Milestones
 * Further RTM implementation: Priority for tasks.
-* Better Tablet support
 ###Reached
 * Remember the Milk implementation [07/06]
+* Better tablet support [12/06]
 
 ## ChangeLog
 
