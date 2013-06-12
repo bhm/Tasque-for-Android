@@ -222,6 +222,7 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 		case R.id.menu_delete_tasks_ok:
 			ArrayList<String> tasksToDelete = adapter.getIDsToDelete();
 			Task.delete(context, listId, tasksToDelete);
+			completedTasksListener.onDeleteItems();
 		case R.id.menu_delete_tasks_cancel:
 			this.disableDeleting();
 			return true;

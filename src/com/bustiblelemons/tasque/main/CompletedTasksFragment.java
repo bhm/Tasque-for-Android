@@ -139,12 +139,14 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 			tasqueGroupFragmentListener.onRefreshCategory();
 		case R.id.menu_completed_delete_start:
 			this.startDeleting();
+			getActivity().supportInvalidateOptionsMenu();
 			return true;
 		case R.id.menu_completed_delete_ok:
 			this.deleteSelected();
 			data = Database.getCompletedTasks(context, listId);
 		case R.id.menu_completed_delete_cancel:
 			this.stopDeleting();
+			getActivity().supportInvalidateOptionsMenu();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -161,7 +163,7 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 		abar.setTitle(R.string.fragment_task_group_deleting_title);
 		DELETING_ENABLED = true;
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-		getActivity().supportInvalidateOptionsMenu();
+		
 	}
 
 	void stopDeleting() {
@@ -171,7 +173,6 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 		DELETING_ENABLED = false;
 		adapter.resetDeletionSelection();
 		this.refreshData();
-		getActivity().supportInvalidateOptionsMenu();
 	}
 
 	private void addTask() {

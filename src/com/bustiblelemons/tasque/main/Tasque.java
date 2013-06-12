@@ -302,7 +302,7 @@ public class Tasque extends SherlockFragmentActivity implements OnPageChangeList
 		onAttachRightSideFragment(false);
 		FragmentTransaction transaction = fmanager.beginTransaction();
 		if (completedTasksFragment.isVisible()) {
-			fmanager.popBackStack();
+			onRemoveRightSideFragment();
 			return;
 		}
 		completedTasksFragment = new CompletedTasksFragment();
@@ -582,6 +582,12 @@ public class Tasque extends SherlockFragmentActivity implements OnPageChangeList
 
 	@Override
 	public void onRemoveRightSideFragment() {
+		if (completedTasksFragment != null) {
+			if (completedTasksFragment.isVisible()) {
+				completedTasksFragment.stopDeleting();
+			}
+		}
+		fmanager.popBackStack();
 		findViewById(R.id.fragment_pocket).setVisibility(View.GONE);
 		if (pager.getVisibility() == View.GONE) {
 			pager.setVisibility(View.VISIBLE);
