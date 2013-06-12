@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.sqlite.SQLiteException;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.InputType;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -343,7 +345,14 @@ public class Tasque extends SherlockFragmentActivity implements OnPageChangeList
 				}
 			}
 			if (completedTasksFragment.isVisible()) {
-				return completedTasksFragment.onEditorAction(v, actionId, event);
+				Resources res = context.getResources();
+				if (res.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+					if (res.getDisplayMetrics().densityDpi == DisplayMetrics.DENSITY_HIGH) {
+						return pagerAdapter.getFragment(pager.getCurrentItem()).onEditorAction(v, actionId, event);
+					}
+				} else {
+					return completedTasksFragment.onEditorAction(v, actionId, event);
+				}
 			}
 			return pagerAdapter.getFragment(pager.getCurrentItem()).onEditorAction(v, actionId, event);
 		}

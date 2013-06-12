@@ -176,7 +176,7 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 	}
 
 	private void addTask() {
-		input = (EditText) abar.getCustomView().findViewById(R.id.actionbar_input);
+		input = (EditText) Tasque.getActionBarInput();
 		String task = input.getText().toString();
 		if (task.length() > 0) {
 			Database.newTask(context, listId, task);
