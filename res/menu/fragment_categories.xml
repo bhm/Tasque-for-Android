@@ -13,11 +13,11 @@
         android:orderInCategory="40"
         android:showAsAction="collapseActionView"
         android:title="@string/menu_start_deleting_categories"/>
-    <item
-        android:id="@+id/menu_settings"
-        android:icon="@drawable/ic_action_settings"
-        android:orderInCategory="100"
-        android:showAsAction="collapseActionView"
-        android:title="@string/menu_settings"/>
+<!--     <item -->
+<!--         android:id="@+id/menu_settings" -->
+<!--         android:icon="@drawable/ic_action_settings" -->
+<!--         android:orderInCategory="100" -->
+<!--         android:showAsAction="collapseActionView" -->
+<!--         android:title="@string/menu_settings"/> -->
 
 </menu>

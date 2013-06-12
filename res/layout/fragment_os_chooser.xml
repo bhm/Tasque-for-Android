@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/fragment_os_chooser_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:focusable="false"
+        android:padding="@dimen/padding_horizontal_margin"
+        android:text="@string/fragment_os_chooser_title"
+        android:textSize="@dimen/font_medium" />
+
+    <ListView
+        android:id="@+id/fragment_os_chooser_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/fragment_os_chooser_title" >
+    </ListView>
+
+</RelativeLayout>

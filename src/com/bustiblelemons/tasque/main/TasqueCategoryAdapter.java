@@ -12,6 +12,7 @@ import android.widget.BaseAdapter;
 import android.widget.CheckedTextView;
 
 import com.bustiblelemons.tasque.R;
+import com.bustiblelemons.tasque.settings.SettingsUtil;
 import com.bustiblelemons.tasque.utilities.Utility;
 import com.bustiblelemons.tasque.utilities.Values.Database.Categories;
 

@@ -11,8 +11,8 @@
         android:layout_height="0px"
         android:layout_weight="1"
         android:gravity="center"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingLeft="@dimen/padding_horizontal_margin"
+        android:paddingRight="@dimen/padding_horizontal_margin"
         android:text="@string/fragment_multiple_hint"
         android:textSize="@dimen/font_small" />
 
@@ -29,7 +29,7 @@
         android:layout_width="match_parent"
         android:layout_height="0px"
         android:layout_weight="1"
-        android:text="@string/fragment_importer_start_fresh_here" />
+        android:text="@string/activity_chooser_start_fresh" />
 
     <TextView
         android:id="@+id/fragment_multiple_use_rtm"
@@ -37,6 +37,6 @@
         android:layout_width="match_parent"
         android:layout_height="0px"
         android:layout_weight="1"
-        android:text="@string/fragment_importer_use_remember_the_milk" />
+        android:text="@string/activity_chooser_use_remember_the_milk" />
 
 </LinearLayout>

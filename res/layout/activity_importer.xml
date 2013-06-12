@@ -14,61 +14,28 @@
         android:visibility="gone" />
 
     <LinearLayout
-        android:id="@+id/activity_importer_chooser"
+        android:id="@+id/activity_tutorial_chooser"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/abs__background_holo_light"
+        android:layout_height="0px"
+        android:layout_weight="8"
         android:orientation="vertical"
         android:visibility="gone" >
 
         <TextView
             android:id="@+id/activity_importer_hint"
             android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:gravity="center"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingLeft="@dimen/padding_horizontal_margin"
+            android:paddingRight="@dimen/padding_horizontal_margin"
             android:text="@string/activity_chooser_hint"
-            android:textSize="@dimen/font_small" />
+            android:textSize="@dimen/font_large" />
 
         <ListView
             android:id="@+id/activity_importer_list"
             android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight="6" >
+            android:layout_height="wrap_content" >
         </ListView>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/activity_importer_main"
-        android:layout_width="match_parent"
-        android:layout_height="0px"
-        android:layout_weight="8"
-        android:orientation="vertical" >
-
-        <TextView
-            android:id="@+id/importer_hint"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:padding="@dimen/activity_horizontal_margin"
-            android:text="@string/fragment_importer_hint"
-            android:textSize="@dimen/font_medium" />
-
-        <RadioGroup
-            android:id="@+id/importer_pips"
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:gravity="center"
-            android:orientation="horizontal" >
-        </RadioGroup>
-
-        <android.support.v4.view.ViewPager
-            android:id="@+id/pager"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" >
-        </android.support.v4.view.ViewPager>
     </LinearLayout>
 
     <TextView
@@ -78,8 +45,9 @@
         android:layout_height="0px"
         android:layout_weight="2"
         android:gravity="center"
-        android:text="@string/fragment_importer_start_fresh_here"
-        android:textSize="@dimen/font_small" />
+        android:text="@string/activity_chooser_start_fresh"
+        android:textColor="@color/abs__background_holo_light"
+        android:textSize="@dimen/font_medium" />
 
     <TextView
         android:id="@+id/importer_rtm"
@@ -88,7 +56,19 @@
         android:layout_height="0px"
         android:layout_weight="2"
         android:gravity="center"
-        android:text="@string/fragment_importer_use_remember_the_milk"
-        android:textSize="@dimen/font_small" />
+        android:text="@string/activity_chooser_use_remember_the_milk"
+        android:textColor="@color/abs__background_holo_light"
+        android:textSize="@dimen/font_medium" />
+
+    <TextView
+        android:id="@+id/importer_synchronize_with_other"
+        style="@style/ButtonTasque"
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="2"
+        android:gravity="center"
+        android:text="@string/activity_chooser_synchronize"
+        android:textColor="@color/abs__background_holo_light"
+        android:textSize="@dimen/font_medium" />
 
 </LinearLayout>

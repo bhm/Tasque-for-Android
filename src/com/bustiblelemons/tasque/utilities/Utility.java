@@ -16,7 +16,7 @@ import java.util.Date;
 
 import com.bustiblelemons.tasque.R;
 import com.bustiblelemons.tasque.database.DatabaseAdapter;
-import com.bustiblelemons.tasque.main.SettingsUtil;
+import com.bustiblelemons.tasque.settings.SettingsUtil;
 
 import android.content.Context;
 import android.os.Environment;

@@ -12,6 +12,11 @@ import it.bova.rtmapi.Token;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import android.app.Activity;
 import android.content.Context;
@@ -31,12 +36,11 @@ import android.widget.TextSwitcher;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bustiblelemons.tasque.R;
 import com.bustiblelemons.tasque.database.Database;
-import com.bustiblelemons.tasque.main.SettingsUtil;
+import com.bustiblelemons.tasque.settings.SettingsUtil;
 
 public class RTMAuthFragment extends SherlockFragment implements OnTouchListener {
 	public static final String FRAGMENT_TAG = "rtm_auth";
 	private View view;
-	private String authURL;
 	private TextSwitcher switcher;
 
 	public interface OnCompleteAuthentication {
@@ -44,7 +48,6 @@ public class RTMAuthFragment extends SherlockFragment implements OnTouchListener
 	}
 
 	private OnCompleteAuthentication completeAuthentication;
-	private RtmApiAuthenticator auth;
 
 	public interface OnShowRTMAuthFragment {
 		public void onShowRTMAuthFragment();
@@ -65,57 +68,90 @@ public class RTMAuthFragment extends SherlockFragment implements OnTouchListener
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		Log.d(TAG, "RTMAuthFragment:onCreate");
 		super.onCreate(savedInstanceState);
-		auth = new RtmApiAuthenticator(Milk.API_KEY, Milk.API_SECRET);
 	}
 
 	private String frob;
-	private boolean browserLanched;
+	private boolean browserLanched = false;
+	private String authUrl;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		Log.d(TAG, "RTMAuthFragment:onCreateView");
 		view = inflater.inflate(R.layout.fragment_rtm_auth, null);
 		switcher = (TextSwitcher) view.findViewById(R.id.fragment_rtm_auth_feedback_text);
-		setRetainInstance(true);
+		setRetainInstance(false);
 		return view;
-	}
-
-	protected void getToken() {
-		new Importer().execute(frob);
 	}
 
 	@Override
 	public void onStart() {
 		super.onStart();
+		Log.d(TAG, "RTMAuthFragment:onStart");
+		ExecutorService service = Executors.newSingleThreadExecutor();
+		Callable<String> urlRequester = new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				String r = "";
+				try {
+					RtmApiAuthenticator auth = new RtmApiAuthenticator(Milk.API_KEY, Milk.API_SECRET);
+					Log.d(TAG, "Auth: " + auth);
+					frob = auth.authGetFrob();
+					Log.d(TAG, "Frob: " + frob);
+					r = auth.authGetDesktopUrl(Permission.DELETE, frob);
+				} catch (ServerException e) {
+					e.printStackTrace();
+				} catch (RtmApiException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return r;
+			}
+		};
+		Future<String> f = service.submit(urlRequester);
 		try {
-			switcher.setText("");
-			frob = auth.authGetFrob();
-			authURL = auth.authGetDesktopUrl(Permission.DELETE, frob);
-		} catch (ServerException e) {
+			authUrl = f.get();
+			Log.d(TAG, "Retreived URL: " + authUrl);
+		} catch (InterruptedException e) {
 			e.printStackTrace();
-		} catch (RtmApiException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (ExecutionException e) {
 			e.printStackTrace();
 		} finally {
+			switcher.setText("");
 			if (!browserLanched) {
-				this.launchBrowser();
+				this.launchBrowser(authUrl);
 			}
 		}
 	}
 
-	private void launchBrowser() {
-		Log.d(FRAGMENT_TAG, "URL: " + authURL);
-		Uri uri = Uri.parse(authURL);
-		Intent browser = new Intent(Intent.ACTION_VIEW, uri);
-		startActivityForResult(browser, 10);
-		browserLanched = true;
+	@Override
+	public void onResume() {
+		super.onResume();
+		Log.d(TAG, "RTMAuthFragment:onResume");
+	}
+
+	private void launchBrowser(String url) {
+		try {
+			Uri uri = Uri.parse(url);
+			Intent browser = new Intent(Intent.ACTION_VIEW, uri);
+			startActivityForResult(browser, 10);
+			browserLanched = true;
+		} catch (NullPointerException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+		Log.d(TAG, "Request: " + requestCode + "\tResult Code: " + resultCode);
 		this.getToken();
+	}
+
+	protected void getToken() {
+		new Importer().execute(frob);
 	}
 
 	private class Importer extends AsyncTask<Object, String, Integer> {
@@ -141,9 +177,17 @@ public class RTMAuthFragment extends SherlockFragment implements OnTouchListener
 				publishProgress(context.getString(R.string.fragment_auth_rtm_getting_auth_url));
 				token = auth.authGetToken(frob);
 				publishProgress(context.getString(R.string.fragment_auth_rtm_got_url));
+				this.sleep();
 				RtmApiTransactable transactable = RTMBackend.getTransactable(token);
 				SettingsUtil.saveRTMToken(context, token);
-				Database.createFreshDatabase(context, false);
+				publishProgress(context.getString(R.string.fragment_auth_rtm_categories_saved_token));
+				this.sleep();
+				if (!SettingsUtil.rtmAccountConfigured(context)) {
+					publishProgress(context.getString(R.string.fragment_auth_rtm_categories_catch_up));
+					RTMBackend.uploadCategories(context, false);
+					RTMBackend.uploadTasks(context, false);
+				}
+				Database.createFreshDatabase(context, false, true);
 				Database.createCacheDatabase(context);
 				List<TaskList> lists = transactable.listsGetList();
 				Database.importCategories(context, lists);
@@ -153,11 +197,8 @@ public class RTMAuthFragment extends SherlockFragment implements OnTouchListener
 				for (TaskList list : lists) {
 					List<Task> tasks = transactable.tasksGetByList(list);
 					Database.importTasks(context, tasks, list.getId());
-					publishProgress(String.format(context.getString(R.string.fragment_auth_rtm_got_list),
-							list.getName()));
+					publishProgress(list.getName());
 				}
-				publishProgress(context.getString(R.string.fragment_auth_rtm_auth_done));
-				this.sleep();
 			} catch (ServerException e) {
 				e.printStackTrace();
 				publishProgress(context.getString(R.string.fragment_auth_rtm_problem_hint));
@@ -191,17 +232,19 @@ public class RTMAuthFragment extends SherlockFragment implements OnTouchListener
 			super.onPostExecute(result);
 			switch (result) {
 			case SUCCESS:
-				Log.d(FRAGMENT_TAG, "Done importing everything");
+				Log.d(TAG, "Done importing everything");
 				switcher.setText(context.getString(R.string.fragment_auth_rtm_auth_done));
 				this.sleep();
 				try {
+					SettingsUtil.setRTMAccountConfigured(context, true);
 					completeAuthentication.onCompleteAuthentication(token);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				break;
 			case PROBLEM:
-				Log.d(FRAGMENT_TAG, "Problem\n");
+				Log.d(TAG, "Problem\n");
+				SettingsUtil.setRTMAccountConfigured(context, false);
 				detachRTMAuthFragment.onDetachRTMAuthFragment();
 				this.sleep();
 			default:
@@ -211,7 +254,7 @@ public class RTMAuthFragment extends SherlockFragment implements OnTouchListener
 	}
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		Log.d(FRAGMENT_TAG, "Remember The Milk Fragment Active.");
+		Log.d(TAG, "Remember The Milk Fragment Active.");
 		return true;
 	}
 

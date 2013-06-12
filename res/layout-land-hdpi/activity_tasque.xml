@@ -1,0 +1,35 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Tasque" >
+
+    <FrameLayout
+        android:id="@+id/synchronization_fragment_pocket"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/tasque_main_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" 
+        android:orientation="horizontal">
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/tabs_view_pager"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1" >
+        </android.support.v4.view.ViewPager>
+
+        <LinearLayout
+            android:id="@+id/fragment_pocket"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical" >
+        </LinearLayout>
+    </LinearLayout>
+
+</FrameLayout>

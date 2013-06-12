@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Generated with http://android-holo-colors.com -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <style name="ButtonTasque" parent="android:Widget.Holo.Button">
+	  <item name="android:background">@drawable/btn_default_holo_dark</item>
+  </style>
+
+  <style name="ImageButtonTasque" parent="android:Widget.Holo.ImageButton">
+	  <item name="android:background">@drawable/btn_default_holo_dark</item>
+  </style>
+
+  <style name="SpinnerTasque" parent="android:Widget.Holo.Spinner">
+      <item name="android:background">@drawable/spinner_background_holo_dark</item>
+      <item name="android:dropDownSelector">@drawable/list_selector_holo_dark</item>
+  </style>
+
+  <style name="TabWidgetTasque" parent="@android:style/Widget.TabWidget">
+      <item name="android:tabStripLeft">@null</item>
+      <item name="android:tabStripRight">@null</item>
+      <item name="android:tabStripEnabled">false</item>
+      <item name="android:divider">?android:attr/dividerVertical</item>
+      <item name="android:showDividers">middle</item>
+      <item name="android:dividerPadding">8dip</item>
+      <item name="android:measureWithLargestChild">true</item>
+      <item name="tabLayout">@layout/tab_indicator_holo</item>
+  </style>
+
+  <style name="TabTasque" parent="@android:style/Widget.ActionBar.TabView">
+      <item name="android:paddingLeft">16dip</item>
+      <item name="android:paddingRight">16dip</item>
+      <item name="android:background">@drawable/tab_indicator_holo</item>
+      <item name="android:layout_width">0dip</item>
+      <item name="android:layout_weight">1</item>
+      <item name="android:minWidth">80dip</item>
+  </style>
+
+  <style name="TabTextTasque">
+	  <item name="android:textColor">#ffffff</item>
+      <item name="android:textSize">12sp</item>
+      <item name="android:textStyle">bold</item>
+      <item name="android:textAllCaps">true</item>
+      <item name="android:ellipsize">marquee</item>
+      <item name="android:maxLines">2</item>
+      <item name="android:maxWidth">180dip</item>
+  </style>
+
+  <style name="ProgressBarTasque" parent="android:Widget.Holo.ProgressBar.Horizontal">
+      <item name="android:progressDrawable">@drawable/progress_horizontal_holo_dark</item>
+      <item name="android:indeterminateDrawable">@drawable/progress_indeterminate_horizontal_holo_dark</item>
+  </style>
+
+  <style name="RatingBarTasque" parent="android:Widget.Holo.RatingBar">
+      <item name="android:progressDrawable">@drawable/ratingbar_full_holo_dark</item>
+      <item name="android:indeterminateDrawable">@drawable/ratingbar_full_holo_dark</item>
+  </style>
+
+  <style name="ToggleTasque" parent="android:Widget.Holo.Button.Toggle">
+      <item name="android:background">@drawable/btn_toggle_holo_dark</item>
+  </style>
+
+</resources>

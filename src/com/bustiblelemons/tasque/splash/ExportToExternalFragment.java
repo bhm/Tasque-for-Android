@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.bustiblelemons.tasque.R;
-import com.bustiblelemons.tasque.main.SettingsUtil;
+import com.bustiblelemons.tasque.settings.SettingsUtil;
 
 public class ExportToExternalFragment extends SherlockFragment implements OnClickListener, OnTouchListener {
 

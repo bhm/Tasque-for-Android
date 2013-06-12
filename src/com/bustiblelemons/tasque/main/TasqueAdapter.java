@@ -16,6 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bustiblelemons.tasque.R;
+import com.bustiblelemons.tasque.settings.SettingsUtil;
 import com.bustiblelemons.tasque.utilities.Utility;
 import com.bustiblelemons.tasque.utilities.Values.Database.Task.TaskState;
 import com.bustiblelemons.tasque.utilities.Values.Database.Tasks;
@@ -36,6 +37,7 @@ public class TasqueAdapter extends android.widget.BaseAdapter {
 	public TasqueAdapter(Context context, Cursor data) {
 		this.data = data;
 		Log.d(TAG, "TasqueAdapter. Size: " + data.getCount());
+		this.foo();
 		this.context = context;
 		this.checked = new SparseBooleanArray();
 		this.forDeletion = new SparseBooleanArray();
@@ -47,8 +49,15 @@ public class TasqueAdapter extends android.widget.BaseAdapter {
 		this.today_color = SettingsUtil.getTodayColor(context);
 		this.setChecked();
 	}
+	
+	private void foo() {
+		while(data.moveToNext()) {
+			Log.d(TAG, "Category : " + data.getString(data.getColumnIndex(Tasks.CATEGORY)));
+		}
+	}
 
 	private void setChecked() {
+		data.moveToPosition(-1);
 		while (data.moveToNext()) {
 			int state = data.getInt(data.getColumnIndex(Tasks.STATE));
 			if (state == TaskState.Completed) {
@@ -98,6 +107,7 @@ public class TasqueAdapter extends android.widget.BaseAdapter {
 		return this.data.getCount();
 	}
 
+	// FIXME CUrrsoroutofbounds exceptions or after last row
 	@Override
 	public Object getItem(int arg0) {
 		return data.moveToPosition(arg0) ? data : data;
@@ -105,22 +115,25 @@ public class TasqueAdapter extends android.widget.BaseAdapter {
 
 	@Override
 	public long getItemId(int position) {
-		Cursor item = (Cursor) this.getItem(position);
-		return (long) item.getLong(item.getColumnIndex(Tasks.ID));
+		return data.moveToPosition(position) ? data.getLong(data.getColumnIndex(Tasks.ID)) : 0;
 	}
 
 	public String getTaskName(int position) {
-		Cursor item = (Cursor) this.getItem(position);
-		return item.getString(item.getColumnIndex(Tasks.NAME));
+		return data.moveToPosition(position) ? data.getString(data.getColumnIndex(Tasks.NAME)) : "";
 	}
-	
+
 	public String getItemStringId(int position) {
 		return data.moveToPosition(position) ? data.getString(data.getColumnIndex(Tasks.ID)) : "";
 	}
 
+	public String getListId(int position) {
+		data.moveToFirst();
+		return data.moveToPosition(position) ? data.getString(data.getColumnIndex(Tasks.CATEGORY)) : "";
+	}
 
 	private class ViewHolder {
 		CheckedTextView titleView;
+		@SuppressWarnings("unused")
 		ProgressBar bar;
 		TextView dateView;
 		public TextView dueDateView;

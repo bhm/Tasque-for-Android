@@ -14,8 +14,10 @@ import java.util.List;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
@@ -153,12 +155,16 @@ public class DatabaseAdapter {
 		this.moveTasksToInbox(categoryId);
 		return database.delete(TABLE_CATEGORIES, Categories.ID + "=?", new String[] { categoryId });
 	}
-	
+
 	private int moveTasksToInbox(String categoryId) {
-		ContentValues values = new ContentValues();
-		String inboxId = getCategoryId("Inbox");
-		values.put(Tasks.CATEGORY, inboxId);
-		return database.update(TABLE_TASKS, values, Tasks.CATEGORY + "=?", new String[] { categoryId });
+		try {
+			ContentValues values = new ContentValues();
+			String inboxId = getCategoryId("Inbox");
+			values.put(Tasks.CATEGORY, inboxId);
+			return database.update(TABLE_TASKS, values, Tasks.CATEGORY + "=?", new String[] { categoryId });
+		} catch (CursorIndexOutOfBoundsException e) {
+			return 0;
+		}
 	}
 
 	int deleteNote(String taskID, String noteId) {
@@ -185,21 +191,20 @@ public class DatabaseAdapter {
 		return cur;
 	}
 
-	protected int getCategoriesCount() {
+	protected int getCategoriesCount() throws SQLiteException {
 		return database.query(TABLE_CATEGORIES, null, null, null, null, null, null).getCount();
 	}
 
-	protected Cursor getCategoriesCursor() {
+	protected Cursor getCategoriesCursor() throws SQLiteException {
 		Cursor ret = database.query(TABLE_CATEGORIES, null, null, null, null, null, Categories.NAME + " ASC");
 		Log.d(TAG, "Categories: " + ret.getCount() + " x " + ret.getColumnCount());
 		return ret;
 	}
 
-	protected String getCategoryId(String categoryName) {
+	protected String getCategoryId(String categoryName) throws CursorIndexOutOfBoundsException, SQLiteException {
 		Cursor cur = database.query(TABLE_CATEGORIES, new String[] { Categories.ID }, Categories.NAME + "=?",
 				new String[] { categoryName }, null, null, null);
 		Log.d(TAG, "Getting task identifier for category " + categoryName);
-		Log.d(TAG, "Cursor: " + cur.getCount() + " X " + cur.getColumnCount());
 		cur.moveToFirst();
 		return cur.getString(cur.getColumnIndex(Categories.ID));
 	}
@@ -299,9 +304,9 @@ public class DatabaseAdapter {
 	}
 
 	Cursor getTasks() {
-		Cursor cur = database.query(TABLE_TASKS, null, Tasks.STATE + "<>?",
-				new String[] { String.valueOf(TaskState.Deleted) }, null, null, null);
-		Log.d(TAG, "Cursor for all tasks " + cur.getCount() + " X " + cur.getColumnCount());
+		Cursor cur = database.query(TABLE_TASKS, null, Tasks.STATE + "<>? AND " + Tasks.STATE + "<>?", new String[] {
+				String.valueOf(TaskState.Deleted), String.valueOf(TaskState.Completed) }, null, null, null);
+		Log.d(TAG, "Cursor getTasks() " + cur.getCount() + " X " + cur.getColumnCount());
 		return cur;
 	}
 
@@ -317,25 +322,24 @@ public class DatabaseAdapter {
 		}
 		Cursor r = database.query(TABLE_TASKS, null, b.toString(), ids.toArray(new String[ids.size()]), null, null,
 				null);
-		Log.d(TAG, "Tasks size for cache " + r.getColumnCount() + " " + r.getCount());
+		Log.d(TAG, "Cursor getTasks() " + r.getColumnCount() + " " + r.getCount());
 		return r;
 	}
 
-	Cursor getTasks(int categoryId) {
+	Cursor getTasks(String categoryId) {
 		Cursor cursor = database.query(TABLE_TASKS, null, Tasks.CATEGORY + "=? AND " + Tasks.STATE + "=? OR "
 				+ Tasks.CATEGORY + "=? AND " + Tasks.STATE + "=?",
 				new String[] { String.valueOf(categoryId), String.valueOf(TaskState.Active),
 						String.valueOf(categoryId), String.valueOf(TaskState.Renamed) }, null, null, Tasks.NAME
 						+ " ASC");
-		Log.d(TAG, "\nGetting tasks. Category " + categoryId + "\nSize: " + cursor.getCount());
+		Log.d(TAG, "Getting tasks. Category " + categoryId + "\tSize: " + cursor.getCount());
 		return cursor;
 	}
 
 	Cursor getTasks(Iterable<String> categories) {
-		MatrixCursor ret = new MatrixCursor(new String[] { Tasks.ID, Tasks.CATEGORY, Tasks.NAME, Tasks.DUE_DATE,
-				Tasks.COMPLETION_DATE, Tasks.PRIORITY, Tasks.STATE, Tasks.EXTERNALID });
+		MatrixCursor ret = new MatrixCursor(Database.taskColumns);
 		for (String cat : categories) {
-			Cursor cursor = this.getTasks(Integer.valueOf(cat));
+			Cursor cursor = this.getTasks(cat);
 			while (cursor.moveToNext()) {
 				ArrayList<Object> columnValues = new ArrayList<Object>();
 				for (int i = 0; i < cursor.getColumnCount(); i++) {
@@ -351,10 +355,6 @@ public class DatabaseAdapter {
 			}
 		}
 		return ret;
-	}
-
-	Cursor getTasks(String listId) {
-		return this.getTasks(Integer.valueOf(listId));
 	}
 
 	private ContentValues getValues(Cursor cur) {
@@ -446,7 +446,7 @@ public class DatabaseAdapter {
 	void insertNotes(Task task) {
 		database.delete(TABLE_NOTES, Notes.TASK + "=?", new String[] { task.getId() });
 		for (Note note : task.getNotes()) {
-			Log.d(TAG, "Inserting notes for " + task.getName() + "\nNote: " + note.getText());
+			Log.d(TAG, "Inserting notes for " + task.getName() + "\tNote: " + note.getText());
 			ContentValues noteValues = new ContentValues();
 			noteValues.put(Notes.TASK, task.getId());
 			noteValues.put(Notes.NAME, note.getTitle());
@@ -588,9 +588,12 @@ public class DatabaseAdapter {
 		return database.update(TABLE_TASKS, values, Tasks.ID + "=?", new String[] { id });
 	}
 
-	int updateCategoryId(String categoryName, String oldListId, String categoryId) {
+	int updateCategoryId(String categoryName, String oldListId, String newListId) {
 		ContentValues values = new ContentValues();
-		values.put(Categories.ID, categoryId);
+		values.put(Categories.ID, newListId);
+		ContentValues taskValues = new ContentValues();
+		taskValues.put(Tasks.CATEGORY, newListId);
+		database.update(TABLE_TASKS, taskValues, Tasks.CATEGORY + "=?", new String[] { oldListId });
 		return database.update(TABLE_CATEGORIES, values, Categories.ID + "=?", new String[] { oldListId });
 	}
 
@@ -620,4 +623,11 @@ public class DatabaseAdapter {
 		values.put(Tasks.NAME, name);
 		return database.update(TABLE_TASKS, values, Tasks.ID + "=?", new String[] { id });
 	}
+
+	public Cursor getCategoryNames() {
+		Cursor r = database.query(TABLE_CATEGORIES, new String[] { Categories.NAME }, null, null, null, null, null);
+		Log.d(TAG, "Category Names cursor " + r.getColumnCount() + " " + r.getCount());
+		return r;
+	}
+
 }

@@ -23,10 +23,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:checkMark="@drawable/tasque_checkbox_light"
-            android:paddingBottom="@dimen/activity_horizontal_margin"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_horizontal_margin"
+            android:paddingBottom="@dimen/padding_horizontal_margin"
+            android:paddingLeft="@dimen/padding_horizontal_margin"
+            android:paddingRight="@dimen/padding_horizontal_margin"
+            android:paddingTop="@dimen/padding_horizontal_margin"
             android:text="@string/placeholder"
             android:textColor="@color/abs__background_holo_dark"
             android:textSize="@dimen/font_very_small" >
@@ -39,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/single_tasque_title_row"
         android:gravity="left|bottom"
-        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/padding_horizontal_margin"
         android:text="@string/placeholder_date"
         android:textSize="@dimen/font_very_small"
         android:visibility="gone" />
@@ -50,7 +50,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/single_tasque_title_row"
         android:gravity="right|bottom"
-        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/padding_horizontal_margin"
         android:text="@string/placeholder_date"
         android:textSize="@dimen/font_very_small"
         android:visibility="gone" />

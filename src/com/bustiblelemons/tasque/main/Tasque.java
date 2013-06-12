@@ -11,6 +11,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.database.sqlite.SQLiteException;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
@@ -26,6 +27,7 @@ import android.util.Pair;
 import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
@@ -38,46 +40,40 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bustiblelemons.tasque.R;
 import com.bustiblelemons.tasque.database.Database;
 import com.bustiblelemons.tasque.frontend.Alarms;
-import com.bustiblelemons.tasque.main.CategoriesFragment.OnRefreshPagerAdapter;
-import com.bustiblelemons.tasque.main.CategoriesFragment.OnShowCategoriesFragment;
-import com.bustiblelemons.tasque.main.CategoriesFragment.OnShowInAllCategoriesChanged;
-import com.bustiblelemons.tasque.main.CompletedTasksFragment.OnShowCompletedTasksFragment;
-import com.bustiblelemons.tasque.main.CompletedTasksFragment.OnTaskMarkedActive;
-import com.bustiblelemons.tasque.main.NotesFragment.OnNotesFragmentHidden;
-import com.bustiblelemons.tasque.main.TasqueGroupFragment.OnRefreshCategory;
-import com.bustiblelemons.tasque.main.TasqueGroupFragment.OnSetActionBarForInput;
-import com.bustiblelemons.tasque.main.TasqueGroupFragment.OnSetDefaultCategory;
-import com.bustiblelemons.tasque.main.TasqueGroupFragment.OnShowNotesFragment;
+import com.bustiblelemons.tasque.main.CategoriesFragment.CategoriesFragmentListener;
+import com.bustiblelemons.tasque.main.CompletedTasksFragment.CompletedTasksListener;
+import com.bustiblelemons.tasque.main.NotesFragment.NotesFragmentListener;
+import com.bustiblelemons.tasque.main.TasqueGroupFragment.TasqueGroupFragmentListener;
 import com.bustiblelemons.tasque.rtm.RTMBackend;
+import com.bustiblelemons.tasque.rtm.RTMConnectivityReceiver;
 import com.bustiblelemons.tasque.rtm.RTMSyncService;
 import com.bustiblelemons.tasque.rtm.RTMSyncService.OnRTMRefresh;
-import com.bustiblelemons.tasque.rtm.RTMConnectivityReceiver;
 import com.bustiblelemons.tasque.rtm.SynchronizingFragment;
+import com.bustiblelemons.tasque.settings.SettingsUtil;
 import com.bustiblelemons.tasque.utilities.Connection;
 import com.bustiblelemons.tasque.utilities.Utility;
 import com.bustiblelemons.tasque.utilities.Values.FragmentArguments;
 
-public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragment, OnPageChangeListener,
-		OnEditorActionListener, OnSetDefaultCategory, OnShowCategoriesFragment, OnNotesFragmentHidden,
-		OnRefreshPagerAdapter, OnShowInAllCategoriesChanged, OnShowCompletedTasksFragment, OnTaskMarkedActive,
-		OnRefreshCategory, OnSetActionBarForInput, OnRTMRefresh {
+public class Tasque extends SherlockFragmentActivity implements OnPageChangeListener, OnEditorActionListener,
+		NotesFragmentListener, CategoriesFragmentListener, TasqueGroupFragmentListener, OnRTMRefresh,
+		RightSideFragmentPocketListener, CompletedTasksListener {
 
-	private static final String PAGER_POSITION = "PAGER_POSITION";
-	public static boolean MORE_THAN_ONE_FILES_AVAILABLE = false;
 	private NotesFragment notesFragment;
 	private CategoriesFragment categoriesFragment;
 	private CompletedTasksFragment completedTasksFragment;
 	private FragmentManager fmanager;
+	private SynchronizingFragment synchronizingFragment;
 
 	protected static ArrayList<Pair<Integer, String>> categories;
 	private Context context;
 	private MyPagerAdapter pagerAdapter;
 	private ViewPager pager;
 	private ActionBar abar;
-	private RTMConnectivityReceiver wifiReceiver;
+
+	private RTMConnectivityReceiver connectivityReceiver;
+	private IntentFilter connectivityFilter;
 	private SynchronizationReceiver synchronizationReceiver;
-	private SynchronizingFragment synchronizingFragment;
-	private static IntentFilter wifiFilter;
+	private IntentFilter synchronizationFilter;
 	private static EditText customInputField;
 	private static RelativeLayout customAbarInputView;
 	private Intent service;
@@ -96,6 +92,8 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 			case RTMSyncService.SYNC_CATEGORIES_CHANGED:
 				Log.d(TAG, "\t\t\t\tRefreshing the adapter");
 				refreshPagerAdapter();
+				break;
+			case RTMSyncService.SYNC_CATEGORIES_UPLOADED:
 				break;
 			case RTMSyncService.SYNC_DONE:
 				HashSet<String> syncedListsIDs = (HashSet<String>) intent
@@ -130,10 +128,9 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 		super.onCreate(arg0);
 		Log.d(TAG, "Tasque.class onCreate");
 		context = getApplicationContext();
-		Alarms.cancel(context);
 		fmanager = getSupportFragmentManager();
 		setContentView(R.layout.activity_tasque);
-		pager = (ViewPager) findViewById(R.id.pager);
+		pager = (ViewPager) findViewById(R.id.tabs_view_pager);
 		pager.setOnPageChangeListener(this);
 		abar = getSupportActionBar();
 		try {
@@ -143,6 +140,21 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 		}
 		this.setActionBarForInput();
 		completedTasksFragment = new CompletedTasksFragment();
+		if (RTMBackend.useRTM(context)) {
+			connectivityReceiver = new RTMConnectivityReceiver();
+			connectivityFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+			registerReceiver(connectivityReceiver, connectivityFilter);
+			synchronizationReceiver = new SynchronizationReceiver();
+			synchronizationFilter = new IntentFilter(RTMSyncService.INTENT_FILTER);
+			registerReceiver(synchronizationReceiver, synchronizationFilter);
+			if (Connection.isUp(context)) {
+				startRTMRefreshService(context, false);
+				String defaultID = RTMBackend.getDefaultListId(context);
+				if (defaultID.length() > 0) {
+					SettingsUtil.setDefaultCategoryId(context, Integer.valueOf(defaultID));
+				}
+			}
+		}
 	}
 
 	private void load() {
@@ -161,42 +173,49 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 	@Override
 	protected void onStart() {
 		super.onStart();
+		Log.d(TAG, "Tasque:onStart()");
 		if (SettingsUtil.hideKeyboard(context)) {
 			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+		}
+		if (SettingsUtil.useLightActionBarInput(context)) {
+			customInputField.setTextColor(context.getResources().getColor(R.color.abs__background_holo_light));
+		}
+		if (SettingsUtil.autoCap(context)) {
+			customInputField.setRawInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
 		}
 		this.load();
 		Utility.applyFontSize(customInputField);
 		int defCat = SettingsUtil.getDefaultCategoryId(context);
 		if (defCat > 0) {
 			this.goToDefaultList(defCat);
-		}		
+		}
+		onRemoveRightSideFragment();
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		wifiReceiver = new RTMConnectivityReceiver();
-		wifiFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-		registerReceiver(wifiReceiver, wifiFilter);
-		synchronizationReceiver = new SynchronizationReceiver();
-		IntentFilter synchronizationFilter = new IntentFilter(RTMSyncService.INTENT_FILTER);
-		registerReceiver(synchronizationReceiver, synchronizationFilter);
-		if (RTMBackend.useRTM(context)) {
-			if (Connection.isUp(context)) {
-				startRTMRefreshService(context);
-				String defaultID = RTMBackend.getDefaultListId(context);
-				if (defaultID.length() > 0) {
-					SettingsUtil.setDefaultCategoryId(context, Integer.valueOf(defaultID));
-				}
-			}
+		try {
+			registerReceiver(synchronizationReceiver, synchronizationFilter);
+			registerReceiver(connectivityReceiver, connectivityFilter);
+		} catch (NullPointerException e) {
+			Log.d(TAG, "One of the receivers were null.");
 		}
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		unregisterReceiver(wifiReceiver);
-		unregisterReceiver(synchronizationReceiver);
+		try {
+			if (connectivityReceiver != null) {
+				unregisterReceiver(connectivityReceiver);
+				unregisterReceiver(synchronizationReceiver);
+			}
+		} catch (IllegalArgumentException e) {
+			Log.d(TAG, "Receiver already unregistered");
+		} catch (NullPointerException e) {
+			Log.d(TAG, "One of the receivers were null");
+		}
 	}
 
 	@Override
@@ -218,28 +237,34 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 	}
 
 	@Override
-	protected void onResumeFragments() {
-		super.onResumeFragments();
-	}
-
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		if (pager != null) {
-			outState.putInt(PAGER_POSITION, pager.getCurrentItem());
-		}
-	}
-
-	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		super.onRestoreInstanceState(savedInstanceState);
-		if (pager != null) {
-			pager.setCurrentItem(savedInstanceState.getInt(PAGER_POSITION));
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		Log.d(TAG, "OnConfigurationChanged");
+		if (completedTasksFragment != null) {
+			if (completedTasksFragment.isVisible()) {
+				completedTasksFragment.setUpHasMenu();
+			}
+		} else if (categoriesFragment != null) {
+			if (categoriesFragment.isVisible()) {
+				categoriesFragment.setActionBar();
+			}
+		} else if (notesFragment != null) {
+			if (notesFragment.isVisible()) {
+				notesFragment.setActionBar();
+			}
+		} else {
+			setActionBarForInput();
 		}
 	}
 
 	@Override
 	public void onShowNotesFragment(String listId, String taskID, String taskName) {
+		if (notesFragment != null) {
+			if (notesFragment.isVisible()) {
+				notesFragment.saveData();
+			}
+		}
+		onAttachRightSideFragment(false);
 		notesFragment = new NotesFragment();
 		FragmentTransaction transaction = fmanager.beginTransaction();
 		Bundle args = new Bundle();
@@ -247,7 +272,7 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 		args.putString(FragmentArguments.LIST_ID, listId);
 		args.putString(FragmentArguments.TASK_NAME, taskName);
 		notesFragment.setArguments(args);
-		transaction.add(R.id.fragment_pocket, notesFragment, NotesFragment.FRAGMENT_TAG);
+		transaction.replace(R.id.fragment_pocket, notesFragment, NotesFragment.FRAGMENT_TAG);
 		transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right, R.anim.slide_in_left,
 				R.anim.slide_out_right);
 		transaction.addToBackStack(null);
@@ -256,15 +281,16 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 
 	@Override
 	public void onShowCategoriesFragment() {
+		onAttachRightSideFragment(true);
 		if (categoriesFragment == null) {
 			categoriesFragment = new CategoriesFragment();
 		}
-		if (categoriesFragment.isHidden()) {
+		if (categoriesFragment.isInLayout()) {
 			fmanager.beginTransaction().show(categoriesFragment).commit();
 			return;
 		}
 		FragmentTransaction transaction = fmanager.beginTransaction();
-		transaction.add(R.id.fragment_pocket, categoriesFragment, CategoriesFragment.FRAGMENT_TAG);
+		transaction.replace(R.id.fragment_pocket, categoriesFragment, CategoriesFragment.FRAGMENT_TAG);
 		transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right, R.anim.slide_in_left,
 				R.anim.slide_out_right);
 		transaction.addToBackStack(null);
@@ -273,12 +299,18 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 
 	@Override
 	public void onShowCompletedTasksFragment(String categoryId) {
+		onAttachRightSideFragment(false);
+		FragmentTransaction transaction = fmanager.beginTransaction();
+		if (completedTasksFragment.isVisible()) {
+			fmanager.popBackStack();
+			return;
+		}
 		completedTasksFragment = new CompletedTasksFragment();
 		Bundle args = new Bundle();
 		args.putString(FragmentArguments.ID, categoryId);
 		completedTasksFragment.setArguments(args);
-		FragmentTransaction transaction = fmanager.beginTransaction();
-		transaction.add(R.id.fragment_pocket, completedTasksFragment, CompletedTasksFragment.FRAGMENT_TAG);
+
+		transaction.replace(R.id.fragment_pocket, completedTasksFragment, CompletedTasksFragment.FRAGMENT_TAG);
 		transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right, R.anim.slide_in_left,
 				R.anim.slide_out_right);
 		transaction.addToBackStack(null);
@@ -287,11 +319,10 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 
 	public void onShowSynchronizationFragment() {
 		synchronizingFragment = new SynchronizingFragment();
-		FragmentTransaction transaction = fmanager.beginTransaction();
-		transaction.add(R.id.synchronization_fragment_pocket, synchronizingFragment, SynchronizingFragment.FRAGMENT_TAG);
-		transaction.setCustomAnimations(R.anim.slide_in_up, R.anim.slide_out_down, R.anim.slide_in_up,
-				R.anim.slide_out_down);
-		transaction.commit();
+		FragmentTransaction tr = fmanager.beginTransaction();
+		tr.add(R.id.synchronization_fragment_pocket, synchronizingFragment, SynchronizingFragment.FRAGMENT_TAG);
+		tr.setCustomAnimations(R.anim.slide_in_up, R.anim.slide_out_down, R.anim.slide_in_up, R.anim.slide_out_down);
+		tr.commit();
 	}
 
 	public void onDetachSynchronizationFragment() {
@@ -343,9 +374,6 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 		customInputField = (EditText) customAbarInputView.findViewById(R.id.actionbar_input);
 		customInputField.setOnEditorActionListener(this);
 		customInputField.setHint(categories.get(pager.getCurrentItem()).second);
-		if (SettingsUtil.autoCap(context)) {
-			customInputField.setRawInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-		}
 		Utility.applyFontSize(customInputField);
 		abar.setDisplayShowCustomEnabled(true);
 		abar.setDisplayShowTitleEnabled(false);
@@ -420,7 +448,6 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 			super.destroyItem(container, position, object);
 			fragments.remove(position);
 		}
-
 	}
 
 	@Override
@@ -447,23 +474,19 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 		}
 	}
 
-	@Override
-	public void onRefreshPagerAdapter() {
-		this.refreshPagerAdapter();
+	private void refreshPagerAdapter() {
+		categories = Database.getCategoriesList(context);
+		for (int i = 0; i < pagerAdapter.getCount(); i++) {
+			this.refreshCategory(i);
+		}
+		pager.setCurrentItem(0);
+		this.setActionBarForInput();
+		this.goToDefaultList(SettingsUtil.getDefaultCategoryId(context));
 		if (categoriesFragment != null) {
 			if (categoriesFragment.isVisible()) {
 				categoriesFragment.refreshCategories();
 			}
 		}
-	}
-
-	private void refreshPagerAdapter() {
-		categories = Database.getCategoriesList(context);
-		pagerAdapter.notifyDataSetChanged();
-		pager.invalidate();
-		pager.setCurrentItem(0);
-		this.setActionBarForInput();
-		this.goToDefaultList(SettingsUtil.getDefaultCategoryId(context));
 	}
 
 	@Override
@@ -477,7 +500,7 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 	}
 
 	@Override
-	public void ontaskMarkedActive() {
+	public void onTaskMarkedActive() {
 		TasqueGroupFragment f = pagerAdapter.getFragment(pager.getCurrentItem());
 		if (f != null) {
 			if (f.isVisible()) {
@@ -487,8 +510,18 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 	}
 
 	@Override
+	public void onRefreshAllCategories() {
+		this.refreshPagerAdapter();
+	}
+
+	@Override
 	public boolean onRefreshCategory() {
 		return this.refreshCategory(pager.getCurrentItem());
+	}
+
+	@Override
+	public boolean onRefreshCategory(int positionInAdapter) {
+		return this.refreshCategory(positionInAdapter);
 	}
 
 	private boolean refreshCategory(String categoryId) {
@@ -500,12 +533,21 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 		return false;
 	}
 
+	@Override
+	public boolean onRefreshCategory(String categoryId) {
+		return this.refreshCategory(categoryId);
+	}
+
 	private boolean refreshCategory(int position) {
-		this.setActionBarForInput();
-		Log.d(TAG, "Refreshing category at " + position + "\n" + categories.get(position).second);
-		TasqueGroupFragment f = (TasqueGroupFragment) pagerAdapter.instantiateItem(pager, position);
-		f.refreshData();
-		this.setActionBarForInput();
+		try {
+			Log.d(TAG, "Refreshing category at " + position + "\n" + categories.get(position).second);
+			TasqueGroupFragment f = (TasqueGroupFragment) pagerAdapter.instantiateItem(pager, position);
+			f.refreshData();
+			this.setActionBarForInput();
+			refreshCompletedFragment();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return true;
 	}
 
@@ -520,15 +562,16 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 	}
 
 	@Override
-	public void startRTMRefreshService(Context context) {
+	public void startRTMRefreshService(Context context, boolean force) {
 		if (isRTMUpdateSericeRunning(context)) {
 			Log.d(TAG, "Service is alread running not starting a new one");
 		} else {
 			service = new Intent(this, RTMSyncService.class);
+			service.putExtra(RTMSyncService.FORCE_SYNC, force);
 			context.startService(service);
 		}
 	}
-	
+
 	private void refreshCompletedFragment() {
 		if (completedTasksFragment != null) {
 			if (completedTasksFragment.isVisible()) {
@@ -537,4 +580,53 @@ public class Tasque extends SherlockFragmentActivity implements OnShowNotesFragm
 		}
 	}
 
+	@Override
+	public void onRemoveRightSideFragment() {
+		findViewById(R.id.fragment_pocket).setVisibility(View.GONE);
+		if (pager.getVisibility() == View.GONE) {
+			pager.setVisibility(View.VISIBLE);
+		}
+		setActionBarForInput();
+		Tasque.getActionBarInput().setHint(categories.get(pager.getCurrentItem()).second);
+	}
+
+	@Override
+	public void onAttachRightSideFragment(boolean rightSideFullScreen) {
+		findViewById(R.id.fragment_pocket).setVisibility(View.VISIBLE);
+		if (rightSideFullScreen) {
+			pager.setVisibility(View.GONE);
+		}
+	}
+
+	@Override
+	public void onStartDeletingCompletedTasks() {
+		if (completedTasksFragment != null) {
+			if (completedTasksFragment.isVisible()) {
+				completedTasksFragment.startDeleting();
+			}
+		}
+	}
+
+	@Override
+	public void onStopDeletingCompletedTasks() {
+		if (completedTasksFragment != null) {
+			if (completedTasksFragment.isVisible()) {
+				completedTasksFragment.stopDeleting();
+			}
+		}
+	}
+
+	@Override
+	public void onDeleteItems() {
+		if (completedTasksFragment != null) {
+			if (completedTasksFragment.isVisible()) {
+				completedTasksFragment.deleteSelected();
+			}
+		}
+	}
+
+	@Override
+	public boolean isTasqueListVisible() {
+		return pagerAdapter.getFragment(pager.getCurrentItem()).isVisible();
+	}
 }

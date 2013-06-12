@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="fragment_os_chooser_title">What is the other device\'s OS?</string>
+    <string name="fragment_os_chooser_linux_title">Linux</string>
+    <string name="fragment_os_chooser_android_title">Android</string>
+    <string name="fragment_os_chooser_windows_title">Windows</string>
+    <string name="fragment_os_chooser_osx_title">Mac</string>
+
+</resources>

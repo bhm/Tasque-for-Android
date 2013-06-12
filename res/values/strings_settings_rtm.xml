@@ -3,6 +3,7 @@
 
     <string name="pref_backend_rtm_token">rtm_token</string>
     <string name="pref_backend_rtm_last_sync">rtm_last_sync_in_ISO8601</string>
+    <string name="pref_backedn_rtm_account_configured">rtm_account_configured</string>
     <!-- Adding tasks -->
     <string name="pref_backenn_rtm_smart_add_key">rtm_use_smart_names</string>
     <string name="pref_backenn_rtm_smart_add_title">Use Smart Add</string>
@@ -10,10 +11,20 @@
     <!-- Settings UI -->
     <string name="pref_header_backend_rtm">Remember The Milk</string>
     <string name="pref_backend_rtm_category_title">Remember The Milk</string>
+    <!-- Configure Account -->
+    <string name="pref_backend_rtm_configure_key">rtm_backend_configure</string>
+    <string name="pref_backend_rtm_configure_not_logged_in_title">Log into Remember The Milk</string>
+    <string name="pref_backend_rtm_configure_not_logged_in_summary">Tap here again to login with a different account</string>
+    <string name="pref_backend_rtm_configure_summary">If you are alread logged in a browser of your choice AND want to log into a different account, log out first!</string>
+    <string name="pref_backend_rtm_configure_logged_in_title">Logged in as&#160;</string>
+    <string name="pref_backend_rtm_configure_logged_in_summary">Tapping here will log you out in <b>A BROWSER</b>. You\'ll stay logged in here.</string>
+    <string name="pref_backend_rtm_configure_url_logout">http://www.rememberthemilk.com/auth.rtm?logout</string>
+    <string name="pref_backend_rtm_configure_no_connection_title">Connect first</string>
+    <string name="pref_backend_rtm_configure_no_connection_summary">Tap here to configure a connection</string>
     <!-- Enable -->
     <string name="pref_backend_use_rtm_key">remember_the_milk_backend</string>
     <string name="pref_backend_use_rtm_title">Use RTM</string>
-    <string name="pref_backend_use_rtm_summary">Turn on syncing to a configured Remember The Milk backend.\n</string>
+    <string name="pref_backend_use_rtm_summary">Turn on syncing to a configured Remember The Milk account.\n</string>
     <!-- Connection -->
     <string name="pref_backend_rtm_use_data_key">rtm_use_mobile_data</string>
     <string name="pref_backend_rtm_use_data_title">Use Mobile Data</string>

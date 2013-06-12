@@ -7,9 +7,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.bustiblelemons.tasque.main.SettingsUtil;
 import com.bustiblelemons.tasque.rtm.RTMSyncBroadcastReceiver;
 import com.bustiblelemons.tasque.rtm.RTMSyncService;
+import com.bustiblelemons.tasque.settings.SettingsUtil;
 
 /**
  * Created 31 May 2013

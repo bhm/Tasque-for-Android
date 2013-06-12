@@ -8,6 +8,13 @@
                 android:key="@string/pref_backend_use_rtm_key"
                 android:summary="@string/pref_backend_use_rtm_summary"
                 android:title="@string/pref_backend_use_rtm_title" />
+
+            <Preference
+                android:dependency="@string/pref_backend_use_rtm_key"
+                android:key="@string/pref_backend_rtm_configure_key"
+                android:summary="@string/pref_backend_rtm_configure_not_logged_in_summary"
+                android:title="@string/pref_backend_rtm_configure_not_logged_in_title" />
+
             <CheckBoxPreference
                 android:defaultValue="true"
                 android:dependency="@string/pref_backend_use_rtm_key"
@@ -21,13 +28,13 @@
             <!-- android:summary="@string/pref_backenn_rtm_smart_add_summary" -->
             <!-- android:title="@string/pref_backenn_rtm_smart_add_title" /> -->
 
+
             <!-- <CheckBoxPreference -->
             <!-- android:defaultValue="true" -->
             <!-- android:dependency="@string/pref_backend_use_rtm_key" -->
             <!-- android:key="@string/pref_backend_rtm_synchronization_only_running_key" -->
             <!-- android:summary="@string/pref_backend_rtm_synchronization_only_running_summary" -->
             <!-- android:title="@string/pref_backend_rtm_synchronization_only_running_title" /> -->
-
 
             <ListPreference
                 android:defaultValue="1800000"

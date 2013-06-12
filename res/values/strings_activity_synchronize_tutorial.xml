@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="activity_tutorial_title">Import a database</string>
+    <string name="tutorial_step_one_hint">Find sqlitebackend.db in</string>
+    <string name="tutorial_step_two_hint">Make a link to the file in your Dropbox/Ubuntu One folder</string>
+    <string name="tutorial_step_three_hint">Export the synchronized file onto the external memory.\nBest to \nSDCard/Tasque/\nfolder</string>
+    <string name="tutorial_done">Done</string>
+    <string name="tutorial_next">Next</string>
+    <!-- Step One Hints -->
+    <string name="tutorial_step_one_linux_hint"><b>Linux</b>\n$HOME/.config/tasque</string>
+    <string name="tutorial_step_one_android_hint"><b>Android</b>\n/mnt/sdcard/Tasque/sqlitebackend.db</string>
+    <string name="tutorial_step_one_mac_hint"><b>Mac</b>\n~/Library</string>
+    <string name="tutorial_step_one_windows_hint" formatted="false"><b>WindowsXP</b>\n%USERPROFILE%\\Application Data\\Tasque\n <b>Vista/7/8/etc</b> %USERPROFILE%\\AppData\\Roaming\\Tasque</string>
+    <!-- Step Two Hints -->
+    <string name="tutorial_step_two_linux_hint"><b>Linux</b>\nln -s \n$HOME/.config/tasque /path/to/dropbox</string>
+    <string name="tutorial_step_two_android_hint"><b>Android</b>\n Long tap send it to a Dropbox/Ubuntu One/etc</string>
+    <string name="tutorial_step_two_mac_hint"><b>Mac</b>\nln -s\n~/Library/path/to/sqlitebackend.db ~/Dropbox/</string>
+    <string name="tutorial_step_two_windows_hint" formatted="false"><b>Vista/7/8/etc</b>\nC:\mklink /D %USERPROFILE%\\AppData\\Roaming\\Tasque %HOMEPATH%\Dropbox</string>
+    <!-- END HINTS -->
+    <string name="tutorial_done_hint">Done! I will look for changes in that file from now on.</string>
+    <string name="fragment_tutorial_find_file_hint">It is best to it place in one of the default folders</string>
+    <!-- Tabs -->
+    <string name="tutorial_step_one_tab_title">Find</string>
+    <string name="tutorial_step_two_tab_title">Link</string>
+    <string name="tutorial_step_three_tab_title">Sync</string>
+
+</resources>

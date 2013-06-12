@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/single_os_chooser_title"
+        style="@style/ButtonTasque"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusable="false"
+        android:gravity="center"
+        android:padding="@dimen/padding_horizontal_margin"
+        android:text="@string/fragment_os_chooser_linux_title"
+        android:textColor="@color/abs__background_holo_light"
+        android:textSize="@dimen/font_medium" />
+
+</LinearLayout>

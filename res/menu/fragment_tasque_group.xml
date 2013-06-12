@@ -29,13 +29,13 @@
         android:id="@+id/menu_start_deleting"
         android:icon="@drawable/ic_action_delete"
         android:orderInCategory="50"
-        android:showAsAction="collapseActionView"
+        android:showAsAction="ifRoom"
         android:title="@string/menu_start_deleting_tasks"/>
     <item
         android:id="@+id/menu_settings"
         android:icon="@drawable/ic_action_settings"
         android:orderInCategory="100"
-        android:showAsAction="collapseActionView"
+        android:showAsAction="ifRoom"
         android:title="@string/menu_settings"/>
 
 </menu>

@@ -2,7 +2,7 @@
 <resources>
 
     <string name="fragment_export_to_dropbox_title">One more question</string>
-    <string name="fragment_export_to_dropbox_question">Should I push the database to <b>\n%1$s\n</b> on each exit?\n\nThis way you can synchronized it with some other devices</string>
+    <string name="fragment_export_to_dropbox_question">Should I push the database to <b>\n%1$s\n</b> on each exit?\n\nThis way you can synchronize Tasque with some other devices</string>
     <string name="fragment_export_to_dropbox_yes">Please do</string>
     <string name="fragment_export_to_dropbox_no">No, no need for that</string>
 

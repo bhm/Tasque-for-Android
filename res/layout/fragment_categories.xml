@@ -9,7 +9,7 @@
         android:id="@+id/fragment_categories_list_hint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/activity_vertical_margin"
+        android:padding="@dimen/padding_vertical_margin"
         android:text="@string/fragment_categories_list_hint"
         android:textSize="@dimen/font_very_small"
         android:textStyle="bold" />

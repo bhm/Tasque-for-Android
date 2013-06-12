@@ -1,11 +1,14 @@
 package com.bustiblelemons.tasque.main;
 
+import static com.bustiblelemons.tasque.utilities.Values.TAG;
+
 import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -16,11 +19,9 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -28,9 +29,10 @@ import com.actionbarsherlock.view.MenuItem;
 import com.bustiblelemons.tasque.R;
 import com.bustiblelemons.tasque.database.Database;
 import com.bustiblelemons.tasque.frontend.Category;
-import com.bustiblelemons.tasque.main.TasqueGroupFragment.OnSetActionBarForInput;
+import com.bustiblelemons.tasque.main.TasqueGroupFragment.TasqueGroupFragmentListener;
 import com.bustiblelemons.tasque.rtm.RTMBackend;
 import com.bustiblelemons.tasque.rtm.RTMSyncService.OnRTMRefresh;
+import com.bustiblelemons.tasque.settings.SettingsUtil;
 
 public class CategoriesFragment extends SherlockFragment implements OnItemClickListener, OnTouchListener,
 		OnItemLongClickListener {
@@ -42,24 +44,18 @@ public class CategoriesFragment extends SherlockFragment implements OnItemClickL
 	private TasqueCategoryAdapter adapter;
 	private Context context;
 	private Cursor data;
-	private ActionBar abar;
-	private EditText inputField;
 
-	public interface OnShowCategoriesFragment {
+	public interface CategoriesFragmentListener {
 		public void onShowCategoriesFragment();
-	}
 
-	public interface OnRefreshPagerAdapter {
-		public void onRefreshPagerAdapter();
-	}
-
-	public interface OnShowInAllCategoriesChanged {
 		public void onShowInAllCategoriesChanged();
+
+		public void onRefreshAllCategories();
 	}
 
-	private OnShowInAllCategoriesChanged showInAllCategoriesChanged;
-	private OnRefreshPagerAdapter refreshPagerAdapter;
-	private OnSetActionBarForInput setActionBarForInput;
+	private CategoriesFragmentListener categoriesFragmentListener;
+	private TasqueGroupFragmentListener tasqueGroupFragmentListener;
+	private RightSideFragmentPocketListener rightSideFragmentChange;
 	private boolean useRTM;
 	private TextView listHint;
 	private boolean EDITING_NAME;
@@ -69,9 +65,9 @@ public class CategoriesFragment extends SherlockFragment implements OnItemClickL
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		rtmRefresh = (OnRTMRefresh) activity;
-		setActionBarForInput = (OnSetActionBarForInput) activity;
-		refreshPagerAdapter = (OnRefreshPagerAdapter) activity;
-		showInAllCategoriesChanged = (OnShowInAllCategoriesChanged) activity;
+		rightSideFragmentChange = (RightSideFragmentPocketListener) activity;
+		tasqueGroupFragmentListener = (TasqueGroupFragmentListener) activity;
+		categoriesFragmentListener = (CategoriesFragmentListener) activity;
 	}
 
 	@Override
@@ -83,6 +79,7 @@ public class CategoriesFragment extends SherlockFragment implements OnItemClickL
 		listView = (ListView) view.findViewById(R.id.fragment_categories_list);
 		listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
 		setHasOptionsMenu(true);
+		setRetainInstance(true);
 		data = Database.getCategories(context);
 		if (useRTM) {
 			this.adapter = new TasqueRTMCategoryAdapter(context, data);
@@ -92,10 +89,7 @@ public class CategoriesFragment extends SherlockFragment implements OnItemClickL
 		listView.setAdapter(adapter);
 		listView.setOnItemClickListener(this);
 		listView.setOnItemLongClickListener(this);
-		abar = getSherlockActivity().getSupportActionBar();
-		inputField = (EditText) abar.getCustomView().findViewById(R.id.actionbar_input);
-		inputField.setHint(R.string.fragment_categories_input_hint);
-		abar.setTitle(R.string.fragment_categories_title);
+		setActionBar();
 		return view;
 	}
 
@@ -118,8 +112,8 @@ public class CategoriesFragment extends SherlockFragment implements OnItemClickL
 	@Override
 	public void onDetach() {
 		super.onDetach();
-		refreshPagerAdapter.onRefreshPagerAdapter();
-		setActionBarForInput.setActionBarForInput();
+		categoriesFragmentListener.onRefreshAllCategories();
+		tasqueGroupFragmentListener.setActionBarForInput();
 	}
 
 	@Override
@@ -142,7 +136,7 @@ public class CategoriesFragment extends SherlockFragment implements OnItemClickL
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_rtm_refresh:
-			rtmRefresh.startRTMRefreshService(context);
+			rtmRefresh.startRTMRefreshService(context, true);
 			return true;
 		case R.id.menu_categories_add:
 			this.addCategory();
@@ -162,7 +156,7 @@ public class CategoriesFragment extends SherlockFragment implements OnItemClickL
 		case R.id.menu_delete_categories_ok:
 			ArrayList<String> categoriesToDelete = adapter.getCheckedToDelete();
 			Category.delete(context, categoriesToDelete);
-			refreshPagerAdapter.onRefreshPagerAdapter();
+			categoriesFragmentListener.onRefreshAllCategories();
 		case R.id.menu_delete_categories_cancel:
 			this.disableDeleting();
 			return true;
@@ -178,7 +172,7 @@ public class CategoriesFragment extends SherlockFragment implements OnItemClickL
 			a.markForDeletion(arg2);
 		} else {
 			a.toggle(arg2);
-			showInAllCategoriesChanged.onShowInAllCategoriesChanged();
+			categoriesFragmentListener.onShowInAllCategoriesChanged();
 		}
 	}
 
@@ -219,6 +213,7 @@ public class CategoriesFragment extends SherlockFragment implements OnItemClickL
 	}
 
 	public void refreshCategories() {
+		Log.d(TAG, "Refreshing Categories in Categories Fragment");
 		data = Database.getCategories(context);
 		if (useRTM) {
 			this.adapter = new TasqueRTMCategoryAdapter(context, data);
@@ -242,6 +237,7 @@ public class CategoriesFragment extends SherlockFragment implements OnItemClickL
 			this.disableDeleting();
 			return true;
 		}
+		rightSideFragmentChange.onRemoveRightSideFragment();
 		return false;
 	}
 
@@ -252,5 +248,9 @@ public class CategoriesFragment extends SherlockFragment implements OnItemClickL
 
 	public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 		return this.addCategory(v);
+	}
+
+	public void setActionBar() {
+		Tasque.getActionBarInput().setHint(R.string.fragment_categories_input_hint);
 	}
 }

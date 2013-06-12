@@ -110,12 +110,13 @@ public class Values {
 
 		public static final class OsInfoFragment {
 			public static final String OS_TYPE = "OS_Type";
-			public static final int OS_COUNT = 3;
+			public static final int OS_COUNT = 4;
 
 			public static final class OS {
 				public static final int LINUX = 0;
-				public static final int MAC = 1;
-				public static final int WINDOWS = 2;
+				public static final int ANDROID = 1;
+				public static final int MAC = 2;
+				public static final int WINDOWS = 3;
 			}
 		}
 

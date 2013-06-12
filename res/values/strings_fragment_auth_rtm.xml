@@ -3,16 +3,17 @@
 
     <string name="fragment_auth_rtm_getting_auth_url">Knock\nKnock</string>
     <string name="fragment_auth_rtm_getting_lists">Loading your lists</string>
-    
+
     <!-- UI -->
-    
     <string name="fragment_auth_rtm_problem_hint"><b>NO ONE IS THERE!</b>\n\nCould not authorize</string>
 
     <!-- LOADING MESSAGES -->
     <string name="fragment_auth_rtm_auth_done">I am the Milkman!\nMy milk is delicious!</string>
     <string name="fragment_auth_rtm_got_url">Who\'s there?</string>
-    <string name="fragment_auth_rtm_categories_inserted">The Milkman!</string>
-    <string name="fragment_auth_rtm_got_lists_prefix">Here. I have your</string>
+    <string name="fragment_auth_rtm_categories_saved_token">The Milkman!</string>
+    <string name="fragment_auth_rtm_categories_catch_up">Let us catch up\nGive me those.</string>
+    <string name="fragment_auth_rtm_categories_inserted">These are yours I believe</string>
+    <string name="fragment_auth_rtm_got_lists_prefix">Here is your</string>
     <string name="fragment_auth_rtm_got_list">%1$s</string>
     <string name="fragment_auth_rtm_categories_and_tasks_inserted">That\'s it! Remember!</string>
 

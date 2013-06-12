@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/fragment_notes_task_name_input_field_hint"
-        android:padding="@dimen/activity_horizontal_margin"
+        android:padding="@dimen/padding_horizontal_margin"
         android:visibility="visible" />
 
     <EditText
@@ -21,7 +21,7 @@
         android:layout_height="match_parent"
         android:gravity="top|left"
         android:hint="@string/fragment_notes_note_input_field_hint"
-        android:padding="@dimen/activity_horizontal_margin"
+        android:padding="@dimen/padding_horizontal_margin"
         android:visibility="gone" />
 
     <ListView

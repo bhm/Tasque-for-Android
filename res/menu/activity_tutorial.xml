@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_activity_tutorial_linux"
+        android:icon="@drawable/ic_action_linux"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:title="@string/fragment_os_chooser_linux_title"/>
+    <item
+        android:id="@+id/menu_activity_tutorial_android"
+        android:icon="@drawable/ic_action_android"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:title="@string/fragment_os_chooser_android_title"/>
+    <item
+        android:id="@+id/menu_activity_tutorial_windows"
+        android:icon="@drawable/ic_action_windows"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:title="@string/fragment_os_chooser_windows_title"/>
+    <item
+        android:id="@+id/menu_activity_tutorial_osx"
+        android:icon="@drawable/ic_action_osx"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:title="@string/fragment_os_chooser_osx_title"/>
+
+</menu>

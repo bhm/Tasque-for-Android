@@ -2,10 +2,15 @@ package com.bustiblelemons.tasque.main;
 
 import java.util.ArrayList;
 
+import static com.bustiblelemons.tasque.utilities.Values.TAG;
+
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -27,8 +32,9 @@ import com.actionbarsherlock.view.MenuItem;
 import com.bustiblelemons.tasque.R;
 import com.bustiblelemons.tasque.database.Database;
 import com.bustiblelemons.tasque.frontend.Task;
-import com.bustiblelemons.tasque.main.TasqueGroupFragment.OnRefreshCategory;
-import com.bustiblelemons.tasque.main.TasqueGroupFragment.OnShowNotesFragment;
+import com.bustiblelemons.tasque.main.NotesFragment.NotesFragmentListener;
+import com.bustiblelemons.tasque.main.TasqueGroupFragment.TasqueGroupFragmentListener;
+import com.bustiblelemons.tasque.rtm.RTMBackend;
 import com.bustiblelemons.tasque.utilities.Values.FragmentArguments;
 
 public class CompletedTasksFragment extends SherlockFragment implements OnItemClickListener, OnItemLongClickListener,
@@ -45,24 +51,28 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 	private boolean DELETING_ENABLED;
 	private ActionBar abar;
 
-	public interface OnShowCompletedTasksFragment {
+	public interface CompletedTasksListener {
 		public void onShowCompletedTasksFragment(String listId);
+
+		public void onTaskMarkedActive();
+
+		public void onStartDeletingCompletedTasks();
+
+		public void onStopDeletingCompletedTasks();
+
+		public void onDeleteItems();
 	}
 
-	public interface OnTaskMarkedActive {
-		public void ontaskMarkedActive();
-	}
-
-	private OnShowNotesFragment showNotesFragment;
-
-	private OnRefreshCategory refreshCategory;
+	private NotesFragmentListener showNotesFragment;
+	private TasqueGroupFragmentListener tasqueGroupFragmentListener;
+	private RightSideFragmentPocketListener rightSideFragmentChange;
 	private EditText input;
 
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		showNotesFragment = (OnShowNotesFragment) activity;
-		refreshCategory = (OnRefreshCategory) activity;
+		rightSideFragmentChange = (RightSideFragmentPocketListener) activity;
+		tasqueGroupFragmentListener = (TasqueGroupFragmentListener) activity;
 	}
 
 	@Override
@@ -71,29 +81,44 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 		this.context = getActivity().getApplicationContext();
 		this.args = getArguments();
 		this.listId = args.getString(FragmentArguments.ID);
-		this.data = Database.getCompletedTasks(context, listId);
-		abar = getSherlockActivity().getSupportActionBar();
-		abar.setDisplayShowCustomEnabled(false);
-		abar.setDisplayShowTitleEnabled(true);
-		abar.setTitle(context.getString(R.string.fragment_completed_title));
 	}
 
+	// FIXME Menu is changing due to fragments being reinstaintained.
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		view = inflater.inflate(R.layout.fragment_completed_tasks, null);
 		listView = (ListView) view.findViewById(R.id.fragment_completed_tasks_list);
+		this.data = Database.getCompletedTasks(context, listId);
 		adapter = new TasqueAdapter(context, data);
 		listView.setAdapter(adapter);
 		listView.setOnItemClickListener(this);
 		listView.setOnItemLongClickListener(this);
-		setHasOptionsMenu(true);
 		return view;
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		setUpHasMenu();
+	}
+
+	public void setUpHasMenu() {
+		if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+			if (context.getResources().getDisplayMetrics().densityDpi == DisplayMetrics.DENSITY_HIGH) {
+				Log.d(TAG, "High density");
+				setHasOptionsMenu(false);
+				tasqueGroupFragmentListener.setActionBarForInput();
+			}
+		} else {
+			setHasOptionsMenu(true);
+			setActionBar();
+		}
 	}
 
 	@Override
 	public void onDetach() {
 		super.onDetach();
-		refreshCategory.onRefreshCategory();
+		tasqueGroupFragmentListener.onRefreshCategory();
 	}
 
 	@Override
@@ -111,23 +136,42 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 		switch (item.getItemId()) {
 		case R.id.menu_completed_add_new_task:
 			this.addTask();
-			refreshCategory.onRefreshCategory();
+			tasqueGroupFragmentListener.onRefreshCategory();
 		case R.id.menu_completed_delete_start:
-			abar.setTitle(R.string.fragment_task_group_deleting_title);
-			DELETING_ENABLED = true;
-			listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-			getActivity().supportInvalidateOptionsMenu();
+			this.startDeleting();
 			return true;
 		case R.id.menu_completed_delete_ok:
-			ArrayList<String> tasksToDelete = adapter.getIDsToDelete();
-			Task.delete(context, listId, tasksToDelete);
+			this.deleteSelected();
 			data = Database.getCompletedTasks(context, listId);
 		case R.id.menu_completed_delete_cancel:
-			this.disableDeleting();
+			this.stopDeleting();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	void deleteSelected() {
+		ArrayList<String> tasksToDelete = adapter.getIDsToDelete();
+		Task.delete(context, listId, tasksToDelete);
+	}
+
+	void startDeleting() {
+		abar = getSherlockActivity().getSupportActionBar();
+		abar.setTitle(R.string.fragment_task_group_deleting_title);
+		DELETING_ENABLED = true;
+		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+		getActivity().supportInvalidateOptionsMenu();
+	}
+
+	void stopDeleting() {
+		listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		abar = getSherlockActivity().getSupportActionBar();
+		abar.setTitle(context.getString(R.string.fragment_completed_title));
+		DELETING_ENABLED = false;
+		adapter.resetDeletionSelection();
+		this.refreshData();
+		getActivity().supportInvalidateOptionsMenu();
 	}
 
 	private void addTask() {
@@ -136,6 +180,9 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 		if (task.length() > 0) {
 			Database.newTask(context, listId, task);
 		}
+		if (!RTMBackend.useRTM(context)) {
+			tasqueGroupFragmentListener.onRefreshCategory(0);
+		}
 	}
 
 	public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -143,20 +190,12 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 		return true;
 	}
 
-	private void disableDeleting() {
-		listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-		abar.setTitle(context.getString(R.string.fragment_completed_title));
-		DELETING_ENABLED = false;
-		adapter.resetDeletionSelection();
-		this.refreshData();
-		getActivity().supportInvalidateOptionsMenu();
-	}
-
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (DELETING_ENABLED) {
-			this.disableDeleting();
+			this.stopDeleting();
 			return true;
 		}
+		rightSideFragmentChange.onRemoveRightSideFragment();
 		return false;
 	}
 
@@ -167,10 +206,17 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 		} else {
 			this.adapter.toggle(arg2);
 			String taskId = String.valueOf(adapter.getItemId(arg2));
-			Task.markActive(context, listId, taskId, adapter.getTaskName(arg2));
-			refreshCategory.onRefreshCategory();
+			String taskName = adapter.getTaskName(arg2);
+			if (!RTMBackend.useRTM(context)) {
+				tasqueGroupFragmentListener.onRefreshCategory(0);
+				String tasksListId = adapter.getListId(arg2);
+				tasqueGroupFragmentListener.onRefreshCategory(tasksListId);
+			}
+			Task.markActive(context, listId, taskId, taskName);
+			tasqueGroupFragmentListener.onRefreshCategory();
 			this.loadData(listId);
 		}
+		setActionBar();
 	}
 
 	@Override
@@ -198,5 +244,12 @@ public class CompletedTasksFragment extends SherlockFragment implements OnItemCl
 
 	public void loadData(Integer position) {
 		this.loadData(String.valueOf(position));
+	}
+
+	public void setActionBar() {
+		abar = getSherlockActivity().getSupportActionBar();
+		abar.setDisplayShowCustomEnabled(false);
+		abar.setDisplayShowTitleEnabled(true);
+		abar.setTitle(context.getString(R.string.fragment_completed_title));
 	}
 }

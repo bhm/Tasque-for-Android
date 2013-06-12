@@ -10,4 +10,6 @@
     <integer name="yuku_default_today_color">0xff0099CC</integer>
     <integer name="yuku_default_overdue_color">0xffCC0000</integer>
 
+    <color name="transparent">#80000000</color>
+
 </resources>

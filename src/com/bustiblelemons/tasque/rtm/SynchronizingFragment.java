@@ -19,6 +19,7 @@ public class SynchronizingFragment extends SherlockFragment implements OnClickLi
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		view = inflater.inflate(R.layout.fragment_synchronizing, null);
 		(view.findViewById(R.id.fragment_synchronizing_cancel)).setOnClickListener(this);
+		setRetainInstance(true);
 		return view;
 	}
 

@@ -9,7 +9,13 @@
     <string name="pref_disabled">OFF</string>
     <string name="pref_first_run">first_run</string>
     <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_rtm_login_from_settings">Login to RTM</string>
+    
+    <!-- IPut settings -->
     <string name="pref_input_category_title">Input settings</string>
+    <string name="pref_input_use_ligt_input_font_key">input_use_light_font_in_action_bar</string>
+    <string name="pref_input_use_ligt_input_font_title">Light Action Bar</string>
+    <string name="pref_input_use_ligt_input_font_summary">Lighter font up the top. Looks nicer. May be cause eye strain and diarrhea.</string>
 
     <!-- Database -->
     <string name="pref_database_external_path_key">database_external_path</string>
@@ -178,17 +184,20 @@
     <string name="pref_use_color_key">use_color</string>
     <string name="pref_use_color_title">Use color</string>
     <string name="pref_use_color_summary">Overdue and today\'s tasks will be coloured. May take a slight toll at the performance.\n</string>
-    <string name="pref_color_category_title">Color Management</string>
+    <string name="pref_color_category_title">Color tasks</string>
     <string name="pref_color_today_key">color_today</string>
     <string name="pref_color_today_title">Today</string>
     <string name="pref_color_overdue_key">color_over_due</string>
     <string name="pref_color_overdue_title">Overdue</string>
 
     <!-- Export Option -->
-    <string name="pref_export_category_title">Export</string>
+    <string name="pref_export_category_title">Export &amp; Synchronization</string>
     <string name="pref_export_database_key">export_database</string>
     <string name="pref_export_database_title">Export database</string>
     <string name="pref_export_database_summary">At each close of the app, database will be copied to the external memory.</string>
+    <string name="pref_export_how_to_key">export_how_to</string>
+    <string name="pref_export_how_to_title">How to synchronize</string>
+    <string name="pref_export_how_to_summary">Tap here to get insctruction on how to synchronize via Dropbox/Ubuntu 1/etc</string>
 
     <!-- ABOUT -->
     <string name="pref_about_screen_title">About</string>

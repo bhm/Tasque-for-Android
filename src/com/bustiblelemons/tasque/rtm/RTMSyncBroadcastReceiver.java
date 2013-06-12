@@ -2,7 +2,7 @@ package com.bustiblelemons.tasque.rtm;
 
 import static com.bustiblelemons.tasque.utilities.Values.TAG;
 
-import com.bustiblelemons.tasque.main.SettingsUtil;
+import com.bustiblelemons.tasque.settings.SettingsUtil;
 import com.bustiblelemons.tasque.utilities.Connection;
 
 import android.content.BroadcastReceiver;

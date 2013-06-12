@@ -6,18 +6,24 @@
             android:key="@string/pref_auto_cap_characters_key"
             android:title="@string/pref_auto_cap_characters_title" />
         <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="@string/pref_hide_keyboard_key"
-            android:summary="@string/pref_hide_keyboard_summary"
-            android:title="@string/pref_hide_keyboard_title" />
+            android:defaultValue="false"
+            android:key="@string/pref_input_use_ligt_input_font_key"
+            android:summary="@string/pref_input_use_ligt_input_font_summary"
+            android:title="@string/pref_input_use_ligt_input_font_title" />
+        <!-- <CheckBoxPreference -->
+        <!-- android:defaultValue="true" -->
+        <!-- android:key="@string/pref_hide_keyboard_key" -->
+        <!-- android:summary="@string/pref_hide_keyboard_summary" -->
+        <!-- android:title="@string/pref_hide_keyboard_title" /> -->
 
-        <ListPreference
-            android:defaultValue="1000"
-            android:entries="@array/pref_time_out_names"
-            android:entryValues="@array/pref_time_out_values"
-            android:key="@string/pref_time_out_key"
-            android:summary="@string/pref_time_out_summary"
-            android:title="@string/pref_time_out_title" />
+
+        <!-- <ListPreference -->
+        <!-- android:defaultValue="1000" -->
+        <!-- android:entries="@array/pref_time_out_names" -->
+        <!-- android:entryValues="@array/pref_time_out_values" -->
+        <!-- android:key="@string/pref_time_out_key" -->
+        <!-- android:summary="@string/pref_time_out_summary" -->
+        <!-- android:title="@string/pref_time_out_title" /> -->
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_font_size_category_title" >
         <ListPreference
@@ -52,6 +58,11 @@
             android:key="@string/pref_export_database_key"
             android:summary="@string/pref_export_database_summary"
             android:title="@string/pref_export_database_title" />
+
+        <Preference
+            android:key="@string/pref_export_how_to_key"
+            android:summary="@string/pref_export_how_to_summary"
+            android:title="@string/pref_export_how_to_title" />
     </PreferenceCategory>
 
 </PreferenceScreen>

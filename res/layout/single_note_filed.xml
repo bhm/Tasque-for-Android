@@ -8,10 +8,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:checkMark="@drawable/tasque_checkbox_light"
-        android:paddingBottom="@dimen/activity_horizontal_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_horizontal_margin"
+        android:paddingBottom="@dimen/padding_horizontal_margin"
+        android:paddingLeft="@dimen/padding_horizontal_margin"
+        android:paddingRight="@dimen/padding_horizontal_margin"
+        android:paddingTop="@dimen/padding_horizontal_margin"
         android:text="@string/placeholder"
         android:textColor="@color/abs__background_holo_dark" />
 
@@ -20,10 +20,10 @@
         style="@style/EditTextTasque"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="@dimen/activity_horizontal_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_horizontal_margin"
+        android:paddingBottom="@dimen/padding_horizontal_margin"
+        android:paddingLeft="@dimen/padding_horizontal_margin"
+        android:paddingRight="@dimen/padding_horizontal_margin"
+        android:paddingTop="@dimen/padding_horizontal_margin"
         android:visibility="gone" />
 
 </RelativeLayout>

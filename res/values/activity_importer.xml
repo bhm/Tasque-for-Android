@@ -5,5 +5,8 @@
     <string name="activity_chooser_hint_lost_previous">The file went missing.\n<b>Choose another file or sync the file in place again</b></string>
     <string name="activity_chooser_connection_un_available"><b>Connect to a network</b></string>
     <string name="activity_chooser_remember_the_milk">Login to Remember The Milk</string>
+    <string name="activity_chooser_use_remember_the_milk">Login to Remember The Milk</string>
+    <string name="activity_chooser_start_fresh">Start Completely Fresh</string>
+    <string name="activity_chooser_synchronize">Synchronize via Service</string>
 
 </resources>

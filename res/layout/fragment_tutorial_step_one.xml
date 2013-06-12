@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/synchronize_step_one"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:visibility="visible" >
+
+    <TextView
+        android:id="@+id/synchronize_step_one_hint"
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="4"
+        android:gravity="center"
+        android:padding="@dimen/padding_horizontal_margin"
+        android:text="@string/tutorial_step_one_hint"
+        android:textSize="@dimen/font_large" />
+
+    <TextView
+        android:id="@+id/synchronize_step_one_explanation"
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="4"
+        android:gravity="center"
+        android:padding="@dimen/padding_horizontal_margin"
+        android:text="@string/tutorial_step_one_hint"
+        android:textSize="@dimen/font_large" />
+
+</LinearLayout>

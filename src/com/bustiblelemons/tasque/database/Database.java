@@ -9,6 +9,7 @@ import it.bova.rtmapi.TaskList;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,8 +22,8 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.bustiblelemons.tasque.R;
-import com.bustiblelemons.tasque.main.SettingsUtil;
 import com.bustiblelemons.tasque.rtm.RTMBackend;
+import com.bustiblelemons.tasque.settings.SettingsUtil;
 import com.bustiblelemons.tasque.utilities.Values.Database.Categories;
 import com.bustiblelemons.tasque.utilities.Values.Database.Notes;
 import com.bustiblelemons.tasque.utilities.Values.Database.Table;
@@ -31,6 +32,13 @@ import com.bustiblelemons.tasque.utilities.Values.Database.Tasks;
 import com.bustiblelemons.tasque.utilities.Values.FragmentArguments;
 
 public class Database {
+	public static String[] taskColumns = new String[] { Table.ID, Tasks.CATEGORY, Table.NAME, Tasks.DUE_DATE,
+			Tasks.COMPLETION_DATE, Tasks.PRIORITY, Tasks.STATE, Table.EXTERNALID, Tasks.ADDED, Tasks.DELETED };
+	public static String[] notesColumns = new String[] { Notes.ID, Notes.TASK, Notes.TEXT, Notes.EXTERNALID,
+			Tasks.ADDED, Tasks.DELETED };
+	public static String[] categoriesColumns = new String[] { Categories.ID, Categories.NAME, Categories.EXTERNALID,
+			Tasks.ADDED, Tasks.DELETED };
+
 	public static long cacheCategoriesDeleted(Context context, Collection<String> listIds) {
 		long r = 0;
 		DatabaseAdapter a = DatabaseAdapter.cacheDatabase(context);
@@ -40,6 +48,9 @@ public class Database {
 				r += a.cacheCategory(listId) > 0 ? 1 : 0;
 			}
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -55,6 +66,9 @@ public class Database {
 			a.Open();
 			r = a.cacheCategoryRenamed(listId, listName);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -69,6 +83,9 @@ public class Database {
 			a.Open();
 			a.newCategory(categoryName);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -83,6 +100,9 @@ public class Database {
 			a.Open();
 			r = a.cacheNewNote(taskId, body);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -96,6 +116,9 @@ public class Database {
 		try {
 			a.Open();
 			r = a.newTask(taskName, null, categoryID);
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -112,6 +135,9 @@ public class Database {
 			a.Open();
 			r = a.newTask(taskName, taskId, categoryID, state);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -126,6 +152,9 @@ public class Database {
 			a.Open();
 			a.cacheNotes(cursor);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -134,7 +163,7 @@ public class Database {
 	}
 
 	public static void cacheNotesDeleted(Context context, Collection<String> noteIds) {
-		Cursor notes = Database.mergeNotesCursor(Database.getCachedNotes(context, noteIds),
+		Cursor notes = Database.mergeNotesCursors(Database.getCachedNotes(context, noteIds),
 				Database.getLocalNotes(context, noteIds));
 		if (notes != null) {
 			Database.cacheNotes(context, notes);
@@ -149,6 +178,9 @@ public class Database {
 		try {
 			a.Open();
 			r = a.cacheTaskRenamed(taskCursor, name);
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			a.Close();
@@ -179,6 +211,9 @@ public class Database {
 			a.Open();
 			a.cacheTasks(cur, TaskState.Deleted);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -207,7 +242,19 @@ public class Database {
 	}
 
 	public static void createFreshDatabase(Context context, boolean insertCategories) {
+		createFreshDatabase(context, insertCategories, false);
+	}
+
+	/**
+	 * 
+	 * @param context
+	 * @param insertCategories
+	 */
+	public static void createFreshDatabase(Context context, boolean insertCategories, boolean removeDatabase) {
 		Log.d(TAG, "Creating a fresh database");
+		if (removeDatabase) {
+			Database.deleteDatabaseFile(context);
+		}
 		DatabaseAdapter a = DatabaseAdapter.localDatabase(context);
 		String creationCategories = context.getString(R.string.creation_string_table_categories);
 		String creationTasks = context.getString(R.string.creation_string_table_tasks);
@@ -233,12 +280,19 @@ public class Database {
 		}
 	}
 
+	private static void deleteDatabaseFile(Context context) {
+		context.getDatabasePath(DatabaseAdapter.DATABASE_NAME).delete();
+	}
+
 	public static void deleteCachedCategory(Context context, String categoryId) {
 		DatabaseAdapter a = DatabaseAdapter.cacheDatabase(context);
 		try {
 			a.Open();
 			a.deleteCategory(categoryId);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -251,12 +305,14 @@ public class Database {
 			a.Open();
 			a.deleteNotes(noteId);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
 		}
 	}
-
 
 	public static void deleteCachedTasks(Context context, String taskId, String categoryId) {
 		DatabaseAdapter a = DatabaseAdapter.cacheDatabase(context);
@@ -264,10 +320,17 @@ public class Database {
 			a.Open();
 			a.deleteTask(taskId);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
 		}
+	}
+
+	public static int deleteCategories(Context context, String... categoryIds) {
+		return Database.deleteCategories(context, new ArrayList<String>(Arrays.asList(categoryIds)));
 	}
 
 	public static int deleteCategories(Context context, Collection<String> categoriesIDs) {
@@ -283,6 +346,9 @@ public class Database {
 				}
 			}
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -296,6 +362,9 @@ public class Database {
 			a.Open();
 			a.deleteCategory(listId);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -310,6 +379,9 @@ public class Database {
 			for (String noteId : noteIds) {
 				r += a.deleteNote(taskId, noteId);
 			}
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			a.Close();
@@ -327,6 +399,9 @@ public class Database {
 				a.deleteTask(task.getId());
 			}
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -362,6 +437,9 @@ public class Database {
 			a.Open();
 			r = a.getCategoriesCursor();
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -382,6 +460,9 @@ public class Database {
 				r = a.getCompletedTasks(categoryID);
 			}
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -396,6 +477,9 @@ public class Database {
 			a.Open();
 			r = a.getNotes();
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -410,6 +494,9 @@ public class Database {
 			a.Open();
 			notes = a.getNotesCursor(noteIds);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -424,10 +511,13 @@ public class Database {
 			a.Open();
 			r = a.getCachedNotes(taskId);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
-		}			
+		}
 		return r;
 	}
 
@@ -437,6 +527,9 @@ public class Database {
 		try {
 			a.Open();
 			r = a.getTasks();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -453,6 +546,9 @@ public class Database {
 			a.Open();
 			r = a.getTasks(listId);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -462,7 +558,7 @@ public class Database {
 
 	public static Cursor getCategories(Context context) {
 		if (RTMBackend.useRTM(context)) {
-			return Database.mergeCategoriesCursor(Database.getCachedCategories(context),
+			return Database.mergeCategoriesCursors(Database.getCachedCategories(context),
 					Database.getLocalCategories(context));
 		} else {
 			return Database.getLocalCategories(context);
@@ -476,6 +572,9 @@ public class Database {
 			a.Open();
 			IDs = a.getCategoryIds();
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -500,12 +599,15 @@ public class Database {
 		return r;
 	}
 
-	public static String getCategoryId(Context context, String categoryName) throws SQLException {
+	public static String getCategoryId(Context context, String categoryName) {
 		DatabaseAdapter a = DatabaseAdapter.localDatabase(context);
 		String r = "";
 		try {
 			a.Open();
 			r = a.getCategoryId(categoryName);
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			a.Close();
@@ -517,19 +619,22 @@ public class Database {
 
 	public static Cursor getCompletedTasks(Context context, String categoryID) {
 		if (RTMBackend.useRTM(context)) {
-			return Database.mergeTasksCursor(Database.getLocalTasksCompleted(context, categoryID),
+			return Database.mergeTasksCursors(Database.getLocalTasksCompleted(context, categoryID),
 					Database.getCachedCompletedTasks(context, categoryID));
 		} else {
 			return Database.getLocalTasksCompleted(context, categoryID);
 		}
 	}
 
-	private static Cursor getLocalCategories(Context context) {
+	public static Cursor getLocalCategories(Context context) {
 		DatabaseAdapter a = DatabaseAdapter.localDatabase(context);
 		Cursor cur = null;
 		try {
 			a.Open();
 			cur = a.getCategoriesCursor();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			a.Close();
@@ -546,6 +651,9 @@ public class Database {
 			a.Open();
 			notes = a.getNotesCursor(noteIds);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -553,12 +661,15 @@ public class Database {
 		return notes;
 	}
 
-	private static Cursor getLocalNotes(Context context, String taskId) {
+	public static Cursor getLocalNotes(Context context, String taskId) {
 		DatabaseAdapter a = DatabaseAdapter.localDatabase(context);
 		Cursor r = null;
 		try {
 			a.Open();
 			r = a.getNotes(taskId);
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			a.Close();
@@ -568,13 +679,15 @@ public class Database {
 		return r;
 	}
 
-
-	private static Cursor getLocalTasks(Context context) {
+	public static Cursor getLocalTasks(Context context) {
 		DatabaseAdapter a = DatabaseAdapter.localDatabase(context);
 		Cursor r = null;
 		try {
 			a.Open();
 			r = a.getTasks();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			a.Close();
@@ -584,12 +697,24 @@ public class Database {
 		return r;
 	}
 
-	private static Cursor getLocalTasks(Context context, String categoryId) {
+	public static Cursor getLocalTasks(Context context, String categoryId) {
 		DatabaseAdapter a = DatabaseAdapter.localDatabase(context);
 		Cursor r = null;
 		try {
 			a.Open();
-			r = a.getTasks(categoryId);
+			if (categoryId.equals(String.valueOf(FragmentArguments.ALL_ID))) {
+				ArrayList<String> categories = SettingsUtil.getSelectedCategories(context);
+				ArrayList<Cursor> cursors = new ArrayList<Cursor>();
+				for (String catId : categories) {
+					cursors.add(a.getTasks(catId));
+				}
+				r = Database.mergeTasksCursors(cursors);
+			} else {
+				r = a.getTasks(categoryId);
+			}
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			a.Close();
@@ -612,6 +737,9 @@ public class Database {
 				r = a.getCompletedTasks(categoryID);
 			}
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			a.Close();
@@ -620,7 +748,7 @@ public class Database {
 	}
 
 	public static Cursor getNotes(Context context, String taskId) {
-		return RTMBackend.useRTM(context) ? Database.mergeNotesCursor(Database.getCachedNotes(context, taskId),
+		return RTMBackend.useRTM(context) ? Database.mergeNotesCursors(Database.getCachedNotes(context, taskId),
 				Database.getLocalNotes(context, taskId)) : Database.getLocalNotes(context, taskId);
 	}
 
@@ -631,6 +759,9 @@ public class Database {
 			a.Open();
 			r = a.getTaskCursor(taskId);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -640,7 +771,7 @@ public class Database {
 
 	public static Cursor getTasks(Context context) {
 		if (RTMBackend.useRTM(context)) {
-			return Database.mergeTasksCursor(Database.getCachedTasks(context), Database.getLocalTasks(context));
+			return Database.mergeTasksCursors(Database.getCachedTasks(context), Database.getLocalTasks(context));
 		} else {
 			return Database.getLocalTasks(context);
 		}
@@ -648,12 +779,13 @@ public class Database {
 
 	public static Cursor getTasks(Context context, String categoryId) {
 		if (RTMBackend.useRTM(context)) {
-			return Database.mergeTasksCursor(Database.getCachedTasks(context, categoryId),
+			return Database.mergeTasksCursors(Database.getCachedTasks(context, categoryId),
 					Database.getLocalTasks(context, categoryId));
 		} else {
 			return Database.getLocalTasks(context, categoryId);
 		}
 	}
+
 	/**
 	 * 
 	 * @param context
@@ -669,6 +801,9 @@ public class Database {
 				r += a.insertList(list);
 			}
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -686,6 +821,9 @@ public class Database {
 				r += a.newOrUpdateTask(task);
 			}
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -706,6 +844,9 @@ public class Database {
 			a.Open();
 			r = a.importTaskList(taskList, listID);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -727,6 +868,9 @@ public class Database {
 			a.execQuery(insertPersonal);
 			a.execQuery(insertProject);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -747,6 +891,9 @@ public class Database {
 				}
 			}
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			a.Close();
@@ -761,6 +908,9 @@ public class Database {
 			a.Open();
 			r = a.setTaskActive(taskId);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -780,6 +930,9 @@ public class Database {
 			a.Open();
 			r = a.setTaskCompleted(id);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -794,6 +947,9 @@ public class Database {
 			a.Open();
 			r = a.setTaskDeleted(taskId);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -813,11 +969,17 @@ public class Database {
 					if (aff > 0) {
 						t.remove(taskId);
 					}
+				} catch (SQLiteException e) {
+					a.Close();
+					e.printStackTrace();
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
 			}
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			a.Close();
@@ -846,14 +1008,21 @@ public class Database {
 		return left.size() > 0 ? Database.markCachedTasksDeleted(context, left) : 0;
 	}
 
-	private static Cursor mergeCategoriesCursor(Cursor... taskCursors) {
-		return Database.mergeCursor(new String[] { Categories.ID, Categories.NAME, Categories.EXTERNALID, Tasks.ADDED,
-				Tasks.DELETED }, taskCursors);
+	private static Cursor mergeCategoriesCursors(Cursor... cursors) {
+		return Database.mergeCursors(categoriesColumns, cursors);
 	}
 
-	private static Cursor mergeCursor(String[] columns, Cursor... taskCursors) {
+	private static Cursor mergeCategoriesCursors(Collection<Cursor> cursors) {
+		return Database.mergeCursors(categoriesColumns, cursors);
+	}
+
+	private static Cursor mergeCursors(String[] columns, Cursor... cursors) {
+		return Database.mergeCursors(columns, new ArrayList<Cursor>(Arrays.asList(cursors)));
+	}
+
+	private static Cursor mergeCursors(String[] columns, Collection<Cursor> cursors) {
 		MatrixCursor r = new MatrixCursor(columns);
-		for (Cursor cursor : taskCursors) {
+		for (Cursor cursor : cursors) {
 			if (cursor != null) {
 				while (cursor.moveToNext()) {
 					ArrayList<Object> columnValues = new ArrayList<Object>();
@@ -874,15 +1043,20 @@ public class Database {
 		return r;
 	}
 
-	private static Cursor mergeNotesCursor(Cursor... taskCursors) {
-		return Database.mergeCursor(new String[] { Notes.ID, Notes.TASK, Notes.TEXT, Notes.EXTERNALID, Tasks.ADDED,
-				Tasks.DELETED }, taskCursors);
+	private static Cursor mergeNotesCursors(Cursor... cursors) {
+		return Database.mergeCursors(notesColumns, cursors);
 	}
 
-	private static Cursor mergeTasksCursor(Cursor... taskCursors) {
-		return Database.mergeCursor(new String[] { Table.ID, Tasks.CATEGORY, Table.NAME, Tasks.DUE_DATE,
-				Tasks.COMPLETION_DATE, Tasks.PRIORITY, Tasks.STATE, Table.EXTERNALID, Tasks.ADDED, Tasks.DELETED },
-				taskCursors);
+	private static Cursor mergeNotesCursors(Collection<Cursor> cursors) {
+		return Database.mergeCursors(notesColumns, cursors);
+	}
+
+	private static Cursor mergeTasksCursors(Collection<Cursor> cursors) {
+		return Database.mergeCursors(taskColumns, cursors);
+	}
+
+	private static Cursor mergeTasksCursors(Cursor... cursors) {
+		return Database.mergeCursors(taskColumns, cursors);
 	}
 
 	public static long newCategory(Context context, String categoryName) {
@@ -891,6 +1065,9 @@ public class Database {
 		try {
 			a.Open();
 			r = a.newCategory(categoryName);
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			a.Close();
@@ -907,6 +1084,9 @@ public class Database {
 			a.Open();
 			r = a.newCategory(categoryName, listId);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -920,6 +1100,9 @@ public class Database {
 		try {
 			a.Open();
 			r = a.newNote(taskId, body);
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			a.Close();
@@ -935,6 +1118,9 @@ public class Database {
 		try {
 			a.Open();
 			r = a.newNote(taskId, noteId, text);
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			a.Close();
@@ -974,6 +1160,9 @@ public class Database {
 			}
 			Log.d(TAG, "Adding " + taskName + " in category " + categoryId);
 			r = a.newTask(taskName, taskId, categoryId);
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			a.Close();
@@ -994,6 +1183,9 @@ public class Database {
 			}
 			Log.d(TAG, "Adding " + taskName + " in category " + listId);
 			r = a.newTask(taskName, taskId, listId, state);
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			a.Close();
@@ -1003,12 +1195,30 @@ public class Database {
 		return r;
 	}
 
+	public static void setCachedCategoryId(Context context, String categoryName, String oldListId, String listId) {
+		DatabaseAdapter a = DatabaseAdapter.cacheDatabase(context);
+		try {
+			a.Open();
+			a.updateCategoryId(categoryName, oldListId, listId);
+			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
+		} catch (SQLException e) {
+			a.Close();
+			e.printStackTrace();
+		}
+	}
+
 	public static void setCategoryId(Context context, String categoryName, String oldListId, String listId) {
 		DatabaseAdapter a = DatabaseAdapter.localDatabase(context);
 		try {
 			a.Open();
 			a.updateCategoryId(categoryName, oldListId, listId);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -1022,6 +1232,9 @@ public class Database {
 			a.Open();
 			r = a.setCategoryName(listId, categoryName);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -1036,6 +1249,9 @@ public class Database {
 			a.Open();
 			r = a.setTaskStatus(taskId, state);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -1049,6 +1265,9 @@ public class Database {
 			a.Open();
 			a.updateNote(noteId, body);
 			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			a.Close();
 			e.printStackTrace();
@@ -1061,6 +1280,9 @@ public class Database {
 		try {
 			a.Open();
 			r = a.updateTaskName(id, name);
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			a.Close();
@@ -1076,6 +1298,9 @@ public class Database {
 		try {
 			a.Open();
 			r = a.updateTaskName(id, name);
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			a.Close();
@@ -1090,6 +1315,9 @@ public class Database {
 		try {
 			a.Open();
 			a.updateNote(noteId, body);
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			a.Close();
@@ -1104,6 +1332,9 @@ public class Database {
 		try {
 			a.Open();
 			r = a.updateNoteId(taskId, newNoteId, body);
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			a.Close();
@@ -1117,6 +1348,45 @@ public class Database {
 		int r = Database.updateLocalTask(context, id, name);
 		if (r == 0) {
 			r = Database.updateCachedTask(context, id, name);
+		}
+		return r;
+	}
+
+	public static List<String> getLocalCategoryNames(Context context) {
+		DatabaseAdapter a = DatabaseAdapter.localDatabase(context);
+		List<String> r = new LinkedList<String>();
+		try {
+			a.Open();
+			Cursor cur = a.getCategoryNames();
+			while (cur.moveToNext()) {
+				r.add(cur.getString(cur.getColumnIndex(Categories.NAME)));
+			}
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
+		} catch (SQLException e) {
+			a.Close();
+			e.printStackTrace();
+		} finally {
+			a.Close();
+		}
+		return r;
+	}
+
+	public static Cursor getTaskCursorByName(Context context, String listName) {
+		Cursor r = null;
+		DatabaseAdapter a = DatabaseAdapter.localDatabase(context);
+		String listId = Database.getCategoryId(context, listName);
+		try {
+			a.Open();
+			r = a.getTaskCursor(listId);
+			a.Close();
+		} catch (SQLiteException e) {
+			a.Close();
+			e.printStackTrace();
+		} catch (SQLException e) {
+			a.Close();
+			e.printStackTrace();
 		}
 		return r;
 	}

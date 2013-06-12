@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="fragment_importer_paths">
+        <item>/</item>
+        <item>/.config/tasque</item>
+        <item>/tasque</item>
+        <item>/Tasque</item>
+        <item>/Library/Caches/</item>
+        <item>/Library/Caches/Tasque</item>
+        <item>/Download/</item>
+        <item>/Downloads</item>
+        <item>/Download/tasque</item>
+    </string-array>
+
+</resources>

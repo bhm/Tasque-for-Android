@@ -31,10 +31,13 @@ import com.actionbarsherlock.view.MenuItem;
 import com.bustiblelemons.tasque.R;
 import com.bustiblelemons.tasque.database.Database;
 import com.bustiblelemons.tasque.frontend.Task;
-import com.bustiblelemons.tasque.main.CategoriesFragment.OnShowCategoriesFragment;
-import com.bustiblelemons.tasque.main.CompletedTasksFragment.OnShowCompletedTasksFragment;
+import com.bustiblelemons.tasque.main.CategoriesFragment.CategoriesFragmentListener;
+import com.bustiblelemons.tasque.main.CompletedTasksFragment.CompletedTasksListener;
+import com.bustiblelemons.tasque.main.NotesFragment.NotesFragmentListener;
 import com.bustiblelemons.tasque.rtm.RTMBackend;
 import com.bustiblelemons.tasque.rtm.RTMSyncService.OnRTMRefresh;
+import com.bustiblelemons.tasque.settings.SettingsActivity;
+import com.bustiblelemons.tasque.settings.SettingsUtil;
 import com.bustiblelemons.tasque.utilities.Values.FragmentArguments;
 
 public class TasqueGroupFragment extends SherlockFragment implements OnItemLongClickListener, OnItemClickListener,
@@ -51,47 +54,33 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 	private Context context;
 	private ActionBar abar;
 
-	public interface OnShowNotesFragment {
-		/**
-		 * 
-		 * @param listId
-		 * @param taskID
-		 * @param taskName
-		 */
-		public void onShowNotesFragment(String listId, String taskID, String taskName);
-	}
+	private NotesFragmentListener showNotesFragment;
 
-	private OnShowNotesFragment showNotesFragment;
+	private CategoriesFragmentListener onShowCategoriesFragment;
 
-	public interface OnSetDefaultCategory {
+	public interface TasqueGroupFragmentListener {
+		public boolean onRefreshCategory();
+
+		public boolean onRefreshCategory(int positionInAdapter);
+
+		public boolean onRefreshCategory(String listId);
+
+		public void setActionBarForInput();
+
 		public void setDefaultCategory(int categoryID);
 	}
 
-	public interface OnSetActionBarForInput {
-		public void setActionBarForInput();
-	}
-
-	private OnSetActionBarForInput setActionBarForInput;
-
-	private OnSetDefaultCategory setDefaultCategoryCallback;
-
-	private OnShowCategoriesFragment onShowCategoriesFragment;
-	private OnShowCompletedTasksFragment showCompletedTasksFragment;
-
-	public interface OnRefreshCategory {
-		public boolean onRefreshCategory();
-	}
-	
+	private TasqueGroupFragmentListener tasqueGroupFragmentListener;
 	private OnRTMRefresh rtmRefresh;
+	private CompletedTasksListener completedTasksListener;
 
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		setActionBarForInput = (OnSetActionBarForInput) activity;
-		showNotesFragment = (OnShowNotesFragment) activity;
-		setDefaultCategoryCallback = (OnSetDefaultCategory) activity;
-		onShowCategoriesFragment = (OnShowCategoriesFragment) activity;
-		showCompletedTasksFragment = (OnShowCompletedTasksFragment) activity;
+		completedTasksListener = (CompletedTasksListener) activity;
+		tasqueGroupFragmentListener = (TasqueGroupFragmentListener) activity;
+		showNotesFragment = (NotesFragmentListener) activity;
+		onShowCategoriesFragment = (CategoriesFragmentListener) activity;
 		rtmRefresh = (OnRTMRefresh) activity;
 	}
 
@@ -113,6 +102,7 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 		context = getActivity().getApplicationContext();
 		setHasOptionsMenu(true);
 		abar = getSherlockActivity().getSupportActionBar();
+		setRetainInstance(true);
 	}
 
 	@Override
@@ -142,14 +132,7 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 
 	public void loadData() {
 		try {
-			switch (categoryID) {
-			case FragmentArguments.ALL_ID:
-				this.data = Database.getTasks(context);
-				break;
-			default:
-				this.data = Database.getTasks(context, listId);
-				break;
-			}
+			this.data = Database.getTasks(context, listId);
 		} catch (NullPointerException e) {
 			e.printStackTrace();
 		}
@@ -162,11 +145,6 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 		listView.setAdapter(adapter);
 	}
 
-	/**
-	 * FIXME Going back from the completed fragment prevents adding
-	 * 
-	 * @param v
-	 */
 	public boolean addTask(TextView v) {
 		String taskName = v.getText().toString();
 		if (taskName.length() > 0) {
@@ -188,13 +166,6 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		menu.clear();
-		/**
-		 * Needs reworking and loading on the fly. May not be understood by
-		 * people.
-		 */
-		// if (Tasque.MORE_THAN_ONE_FILES_AVAILABLE) {
-		// inflater.inflate(R.menu.tasque_group_change_database_file, menu);
-		// }
 		if (SettingsUtil.isDefaultCategory(context, categoryID)) {
 			inflater.inflate(R.menu.fragment_tasque_group_default, menu);
 		} else {
@@ -217,12 +188,6 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 		return false;
 	}
 
-	private void startDeleting() {
-		abar.setDisplayShowCustomEnabled(false);
-		abar.setDisplayShowTitleEnabled(true);
-		abar.setTitle(R.string.fragment_task_group_deleting_title);
-	}
-
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -234,31 +199,25 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 			onShowCategoriesFragment.onShowCategoriesFragment();
 			return true;
 		case R.id.menu_show_completed:
-			showCompletedTasksFragment.onShowCompletedTasksFragment(listId);
+			completedTasksListener.onShowCompletedTasksFragment(listId);
 			return true;
 		case R.id.menu_settings:
 			Intent settings = new Intent(context, SettingsActivity.class);
 			startActivity(settings);
 			return true;
 		case R.id.menu_set_default:
-			setDefaultCategoryCallback.setDefaultCategory(categoryID);
+			tasqueGroupFragmentListener.setDefaultCategory(categoryID);
 			getActivity().supportInvalidateOptionsMenu();
 			return true;
 		case R.id.menu_un_set_default:
-			setDefaultCategoryCallback.setDefaultCategory(0);
+			tasqueGroupFragmentListener.setDefaultCategory(0);
 			getActivity().supportInvalidateOptionsMenu();
 			return true;
 		case R.id.menu_rtm_refresh:
-			rtmRefresh.startRTMRefreshService(context);
-			return true;
-		case R.id.menu_change_database_file:
-			// multipleFilesDetected.onShowMultipleFilesDetected(Utility.getSyncedDatabasePaths(context),
-			// false);
+			rtmRefresh.startRTMRefreshService(context, true);
 			return true;
 		case R.id.menu_start_deleting:
 			this.startDeleting();
-			DELETING_IN_PROGRESS = true;
-			getActivity().supportInvalidateOptionsMenu();
 			return true;
 		case R.id.menu_delete_tasks_ok:
 			ArrayList<String> tasksToDelete = adapter.getIDsToDelete();
@@ -273,9 +232,19 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 
 	private void disableDeleting() {
 		this.refreshData();
-		setActionBarForInput.setActionBarForInput();
+		tasqueGroupFragmentListener.setActionBarForInput();
 		DELETING_IN_PROGRESS = false;
 		getActivity().supportInvalidateOptionsMenu();
+		completedTasksListener.onStopDeletingCompletedTasks();
+	}
+
+	private void startDeleting() {
+		abar.setDisplayShowCustomEnabled(false);
+		abar.setDisplayShowTitleEnabled(true);
+		abar.setTitle(R.string.fragment_task_group_deleting_title);
+		DELETING_IN_PROGRESS = true;
+		getActivity().supportInvalidateOptionsMenu();
+		completedTasksListener.onStartDeletingCompletedTasks();
 	}
 
 	@Override
@@ -285,7 +254,14 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 		} else {
 			adapter.toggle(arg2);
 			String taskId = String.valueOf(adapter.getItemId(arg2));
+			if (!RTMBackend.useRTM(context)) {
+				if (categoryID > 0) {
+					tasqueGroupFragmentListener.onRefreshCategory(0);
+				}
+			}
 			Task.markDone(context, listId, taskId, adapter.getTaskName(arg2));
+			String tasksListId = adapter.getListId(arg2);
+			tasqueGroupFragmentListener.onRefreshCategory(tasksListId);
 			this.refreshData();
 		}
 	}
@@ -299,9 +275,5 @@ public class TasqueGroupFragment extends SherlockFragment implements OnItemLongC
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		return true;
-	}
-
-	public void resetInputField() {
-		setActionBarForInput.setActionBarForInput();
 	}
 }

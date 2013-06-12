@@ -33,7 +33,7 @@ import android.database.Cursor;
 import android.util.Log;
 
 import com.bustiblelemons.tasque.database.Database;
-import com.bustiblelemons.tasque.main.SettingsUtil;
+import com.bustiblelemons.tasque.settings.SettingsUtil;
 import com.bustiblelemons.tasque.utilities.PriorityParser;
 import com.bustiblelemons.tasque.utilities.Values.Database.Categories;
 import com.bustiblelemons.tasque.utilities.Values.Database.Notes;
@@ -80,6 +80,18 @@ public class RTMBackend {
 			}
 		}
 		return false;
+	}
+
+	private static String getCategoryId(List<TaskList> tasksList, String listName) {
+		String r = "";
+		for (TaskList list : tasksList) {
+			if (list.getName().equals(listName)) {
+				r = list.getId();
+				Log.d(TAG, "Found " + r);
+				return r;
+			}
+		}
+		return r;
 	}
 
 	public static void deleteList(Context context, String listId) throws IllegalArgumentException, ServerException,
@@ -222,7 +234,7 @@ public class RTMBackend {
 		return RTMBackend.token == null ? RTMBackend.token = SettingsUtil.getRTMToken(context) : RTMBackend.token;
 	}
 
-	private synchronized static RtmApiTransactable getTransactable(Context context) throws IllegalArgumentException {
+	synchronized static RtmApiTransactable getTransactable(Context context) throws IllegalArgumentException {
 		Token token = RTMBackend.getToken(context);
 		if (token == null) {
 			throw new IllegalArgumentException("Token returned from settings is null");
@@ -436,18 +448,7 @@ public class RTMBackend {
 	 */
 	static Collection<String> synchronizeCache(Context context) {
 		HashSet<String> ret = new HashSet<String>();
-		try {
-			List<TaskList> taskLists = RTMBackend.getTransactable(context).listsGetList();
-			ret.addAll(RTMBackend.uploadCategoriesFromCache(context, taskLists));
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (ServerException e) {
-			e.printStackTrace();
-		} catch (RtmApiException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		ret.addAll(RTMBackend.uploadCategories(context, true));
 		return ret;
 	}
 
@@ -537,43 +538,53 @@ public class RTMBackend {
 	}
 
 	/**
-	 * UPLOAD
+	 * Uploads tasks from the cache (cached=true) or from the main database
+	 * (cached=false) and updates relevant rows.
 	 * 
-	 * @param taskLists
+	 * @param context
+	 * @param cached
+	 *            true to use cache database, false to use the main database.
+	 * @return
 	 */
-	private static Collection<String> uploadCategoriesFromCache(Context context, List<TaskList> taskLists) {
-		Log.d(TAG, "uploadCategoriesFromCache");
+	public static Collection<String> uploadCategories(Context context, boolean cached) {
 		HashSet<String> ret = new HashSet<String>();
-		Cursor c = Database.getCachedCategories(context);
 		String listName;
 		String listId;
-		while (c.moveToNext()) {
-			listName = c.getString(c.getColumnIndex(Categories.NAME));
-			listId = c.getString(c.getColumnIndex(Categories.ID));
+		Cursor cursor = cached ? Database.getCachedCategories(context) : Database.getLocalCategories(context);
+		List<TaskList> taskLists = RTMBackend.getLists(context);
+		while (cursor.moveToNext()) {
+			listName = cursor.getString(cursor.getColumnIndex(Categories.NAME));
+			listId = cursor.getString(cursor.getColumnIndex(Categories.ID));
 			try {
 				if (RTMBackend.categoryExists(taskLists, listId)) {
 					RTMBackend.getTransactable(context).listsSetName(getTimeline(context), listId, listName);
+					Database.setCategoryName(context, listId, listName);
 					Log.d(TAG, "RENAMING LIST " + listId + "\tName:" + listName);
 				} else {
 					int state = 0;
 					try {
-						state = c.getInt(c.getColumnIndex(Categories.STATE));
-						if (state == CategoryState.Deleted) {
-							Log.d(TAG, "DELETING LIST " + listId + "\t" + listName);
-							RTMBackend.getTransactable(context).listsDelete(getTimeline(context), listId);
-						} else {
+						state = cursor.getInt(cursor.getColumnIndex(Categories.STATE));
+					} catch (Exception e) {
+					}
+					if (state == CategoryState.Deleted) {
+						Log.d(TAG, "DELETING LIST " + listId + "\t" + listName);
+						RTMBackend.getTransactable(context).listsDelete(getTimeline(context), listId);
+						Database.deleteCachedCategory(context, listId);
+					} else {
+						String onlineTaskListId = RTMBackend.getCategoryId(taskLists, listName);
+						if (cached || (!cached && onlineTaskListId.length() == 0)) {
 							Log.d(TAG, "UPLOADING NEW LIST " + listName);
 							Transaction<TaskList> t = getTransactable(context).listsAdd(getTimeline(context), listName);
 							TaskList taskList = t.getObject();
-							RTMBackend.uploadTasksFromCache(context, taskList.getId(),
-									Database.getCachedTasks(context, listId));
-							Database.newCategory(context, listName, taskList.getId());
+							onlineTaskListId = taskList.getId();
+							if (cached) {
+								Database.setCachedCategoryId(context, listName, listId, onlineTaskListId);
+							} else {
+								Database.setCategoryId(context, listName, listId, onlineTaskListId);
+							}
 						}
-					} catch (Exception e) {
-
 					}
 				}
-				Database.deleteCachedCategory(context, listId);
 				ret.add(listId);
 			} catch (IllegalArgumentException e) {
 				e.printStackTrace();
@@ -583,13 +594,26 @@ public class RTMBackend {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 		return ret;
 	}
 
-	private static void uploadNotesFromCache(final Context context, final Cursor cur, final String taskId,
-			final String taskseriesId, final String listId) {
+	/**
+	 * 
+	 * @param context
+	 * @param taskId
+	 * @param taskseriesId
+	 * @param listId
+	 * @param localTaskId
+	 * @param cached
+	 */
+	public static void uploadNotes(final Context context, final String taskId, final String taskseriesId,
+			final String listId, final String localTaskId, boolean cached) {
+		Cursor cur = cached ? Database.getCachedNotes(context, localTaskId) : Database.getLocalNotes(context,
+				localTaskId);
 		while (cur.moveToNext()) {
 			String text = cur.getString(cur.getColumnIndex(Notes.TEXT));
 			String title = text.length() > RTMBackend.TITLE_LENGTH - 1 ? text.substring(0, RTMBackend.TITLE_LENGTH)
@@ -601,7 +625,9 @@ public class RTMBackend {
 				String noteId = cur.getString(cur.getColumnIndex(Notes.ID));
 				Note note = noteTransaction.getObject();
 				Database.newNote(context, taskId, note.getId(), note.getText());
-				Database.deleteCachedNote(context, noteId);
+				if (cached) {
+					Database.deleteCachedNote(context, noteId);
+				}
 			} catch (IllegalArgumentException e) {
 				e.printStackTrace();
 			} catch (ServerException e) {
@@ -614,32 +640,42 @@ public class RTMBackend {
 		}
 	}
 
-	
-	private static void uploadTasksFromCache(Context context, String listId, Cursor cachedTasks) {
+	/**
+	 * Uploads tasks from the cache (cached=true) or from the main database
+	 * (cached=false). Updates the ID. Automatically polls for relevant notes.
+	 * 
+	 * @param context
+	 * @param cached
+	 *            pass false to upload already present tasks in the main
+	 *            database.
+	 */
+	public static int uploadTasks(Context context, boolean cached) {
+		int r = 0;
 		String taskName;
 		String taskId;
+		String listId;
+		Cursor tasks = cached ? Database.getCachedTasks(context) : Database.getLocalTasks(context);
+		Log.d(TAG, "uploadTask(" + cached + ")\n" + tasks.getColumnCount() + " " + tasks.getCount());
 		int state;
 		int priority;
-		while (cachedTasks.moveToNext()) {
-			taskId = cachedTasks.getString(cachedTasks.getColumnIndex(Tasks.ID));
-			taskName = cachedTasks.getString(cachedTasks.getColumnIndex(Tasks.NAME));
-			state = cachedTasks.getInt(cachedTasks.getColumnIndex(Tasks.STATE));
-			priority = cachedTasks.getInt(cachedTasks.getColumnIndex(Tasks.PRIORITY));
+		while (tasks.moveToNext()) {
+			taskId = tasks.getString(tasks.getColumnIndex(Tasks.ID));
+			listId = tasks.getString(tasks.getColumnIndex(Tasks.CATEGORY));
+			taskName = tasks.getString(tasks.getColumnIndex(Tasks.NAME));
+			state = tasks.getInt(tasks.getColumnIndex(Tasks.STATE));
+			priority = tasks.getInt(tasks.getColumnIndex(Tasks.PRIORITY));
 			try {
-				Log.d(TAG,
-						"UPLOADING " + listId + "\t" + taskName + "\t" + taskId + "\t" + state
-								+ PriorityParser.parse(priority) + "\t" + state);
+				Log.d(TAG, "UPLOADING ListId: " + listId + "\tTaskName: " + taskName + "\tTaskId:" + taskId
+						+ "\tState: " + state + "\tPriority:" + PriorityParser.parse(priority));
 				Transaction<Task> taskTransaction = RTMBackend.getTransactable(context).tasksAdd(
 						RTMBackend.getTimeline(context), taskName, listId);
 				Task task = taskTransaction.getObject();
 				String onlineTaskId = task.getId();
-				String onlineListId = task.getListId();
 				String taskseriesId = task.getTaskserieId();
-				RTMBackend.setTaskState(context, state, onlineTaskId, onlineListId);
-				Cursor notes = Database.getCachedNotes(context, taskId);
-				RTMBackend.uploadNotesFromCache(context, notes, onlineTaskId, taskseriesId, onlineListId);
-				RTMBackend.setTaskPriority(context, PriorityParser.parse(priority), onlineTaskId, onlineListId,
-						taskseriesId);
+				RTMBackend.setTaskState(context, state, onlineTaskId, listId);
+				RTMBackend.uploadNotes(context, onlineTaskId, taskseriesId, listId, taskId, cached);
+				RTMBackend.setTaskPriority(context, PriorityParser.parse(priority), onlineTaskId, listId, taskseriesId);
+				r++;
 			} catch (IllegalArgumentException e) {
 				e.printStackTrace();
 			} catch (ServerException e) {
@@ -650,13 +686,30 @@ public class RTMBackend {
 				e.printStackTrace();
 			}
 		}
+		return r;
 	}
 
 	public static boolean useRTM(Context context) {
-		return SettingsUtil.useRTMBackend(context);
+		return SettingsUtil.useRTMBackend(context) && SettingsUtil.rtmAccountConfigured(context);
 	}
 
 	private RTMBackend() {
+	}
+
+	public static List<TaskList> getLists(Context context) {
+		List<TaskList> r = new LinkedList<TaskList>();
+		try {
+			r = RTMBackend.getTransactable(context).listsGetList();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (ServerException e) {
+			e.printStackTrace();
+		} catch (RtmApiException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return r;
 	}
 
 }
