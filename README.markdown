@@ -14,7 +14,9 @@ This app uses Color Picker Library, [AmbilWarna](https://code.google.com/p/andro
 You will also need the Milk.java class file containing API_KEY and API_SECRET. I do not provide keys used by the app in the Google Play store.
 
 ## Milestones
+* Dropbox and Ubuntu One APIs.
 * Further RTM implementation: Priority for tasks.
+
 ###Reached
 * Remember the Milk implementation [07/06]
 * Better tablet support [12/06]
