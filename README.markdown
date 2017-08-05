@@ -1,3 +1,6 @@
+
+# This is a very old code. Deprecated at this point
+
 ## Tasque for Android
 
 Tasque for Android is the counter part to Tasque, a simple task management app (TODO List) for the Linux, Windows and Mac Desktops.
